@@ -60,17 +60,17 @@ function clickProxy(page, methodName, callback, lifeCycle) {
         lifeCycle.notify(LifeCycleEventType.PAGE_ALIAS_ACTION, true);
       } else if (methodName === 'onAddToFavorites') {
         action.type = 'click';
-        action.name = '收藏 ' + '标题: ' + result.title + (result.query ? ' query: ' + result.query : '');
+        action.name = '收藏 ' + '标题: ' + (result && result.title) + (result.query ? ' query: ' + result.query : '');
         callback(action);
         lifeCycle.notify(LifeCycleEventType.PAGE_ALIAS_ACTION, true);
       } else if (methodName === 'onShareAppMessage') {
         action.type = 'click';
-        action.name = '转发 ' + '标题: ' + result.title + (result.path ? ' path: ' + result.path : '');
+        action.name = '转发 ' + '标题: ' + (result && result.title) + (result.path ? ' path: ' + result.path : '');
         callback(action);
         lifeCycle.notify(LifeCycleEventType.PAGE_ALIAS_ACTION, true);
       } else if (methodName === 'onShareTimeline') {
         action.type = 'click';
-        action.name = '分享到朋友圈 ' + '标题: ' + result.title + (result.query ? ' query: ' + result.query : '');
+        action.name = '分享到朋友圈 ' + '标题: ' + (result && result.title) + (result.query ? ' query: ' + result.query : '');
         callback(action);
         lifeCycle.notify(LifeCycleEventType.PAGE_ALIAS_ACTION, true);
       } else if (methodName === 'onTabItemTap') {
