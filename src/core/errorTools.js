@@ -3,7 +3,8 @@ export var ErrorSource = {
   CONSOLE: 'console',
   NETWORK: 'network',
   SOURCE: 'source',
-  LOGGER: 'logger'
+  LOGGER: 'logger',
+  CUSTOM: 'custom'
 };
 export function formatUnknownError(stackTrace, errorObject, nonErrorPrefix) {
   if (!stackTrace || stackTrace.message === undefined && !(errorObject instanceof Error)) {

@@ -1,17 +1,15 @@
-import { extend2Lev, withSnakeCaseKeys, performDraw, isEmptyObject } from '../helper/utils';
+import { extend2Lev, withSnakeCaseKeys, isEmptyObject } from '../helper/utils';
 import { LifeCycleEventType } from '../core/lifeCycle';
 import { RumEventType } from '../helper/enums';
 import baseInfo from '../core/baseInfo';
-
-function isTracked(configuration) {
-  return performDraw(configuration.sampleRate);
-}
-
-var SessionType = {
-  SYNTHETICS: 'synthetics',
-  USER: 'user'
-};
-export function startRumAssembly(applicationId, configuration, lifeCycle, parentContexts, getCommonContext) {
+import { SessionType } from '../core/sessionManagement';
+import { createErrorFilter } from '../core/errorFilter';
+export function startRumAssembly(applicationId, configuration, session, lifeCycle, parentContexts, getCommonContext) {
+  var errorFilter = createErrorFilter(configuration, function (error) {
+    lifeCycle.notify(LifeCycleEventType.RAW_ERROR_COLLECTED, {
+      error: error
+    });
+  });
   lifeCycle.subscribe(LifeCycleEventType.RAW_RUM_EVENT_COLLECTED, function (data) {
     var startTime = data.startTime;
     var rawRumEvent = data.rawRumEvent;
@@ -22,7 +20,7 @@ export function startRumAssembly(applicationId, configuration, lifeCycle, parent
       device: baseInfo.deviceInfo
     };
 
-    if (isTracked(configuration) && (viewContext || rawRumEvent.type === RumEventType.APP)) {
+    if (session.isTracked() && (viewContext || rawRumEvent.type === RumEventType.APP)) {
       var actionContext = parentContexts.findAction(startTime);
       var commonContext = savedCommonContext || getCommonContext();
       var rumContext = {
@@ -39,7 +37,7 @@ export function startRumAssembly(applicationId, configuration, lifeCycle, parent
         device: {},
         date: new Date().getTime(),
         session: {
-          id: baseInfo.getSessionId(),
+          id: session.getSessionId(),
           type: SessionType.USER
         },
         user: {
@@ -63,7 +61,18 @@ export function startRumAssembly(applicationId, configuration, lifeCycle, parent
         }, commonContext.user);
       }
 
-      lifeCycle.notify(LifeCycleEventType.RUM_EVENT_COLLECTED, serverRumEvent);
+      if (shouldSend(serverRumEvent, errorFilter)) {
+        console.log(serverRumEvent, '======serverRumEvent-====');
+        lifeCycle.notify(LifeCycleEventType.RUM_EVENT_COLLECTED, serverRumEvent);
+      }
     }
   });
+}
+
+function shouldSend(event, errorFilter) {
+  if (event.type === RumEventType.ERROR) {
+    return !errorFilter.isLimitReached();
+  }
+
+  return true;
 }

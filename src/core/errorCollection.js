@@ -79,17 +79,16 @@ export function startRuntimeErrorTracking(errorObservable) {
 export function stopRuntimeErrorTracking() {
   report.unsubscribe(traceKitReportHandler);
 }
-var filteredErrorsObservable;
+var errorObservable;
 export function startAutomaticErrorCollection(configuration) {
-  if (!filteredErrorsObservable) {
-    var errorObservable = new Observable();
+  if (!errorObservable) {
+    errorObservable = new Observable();
     trackNetworkError(configuration, errorObservable);
     startConsoleTracking(errorObservable);
-    startRuntimeErrorTracking(errorObservable);
-    filteredErrorsObservable = filterErrors(configuration, errorObservable);
+    startRuntimeErrorTracking(errorObservable); // filteredErrorsObservable = filterErrors(configuration, errorObservable)
   }
 
-  return filteredErrorsObservable;
+  return errorObservable;
 }
 export function trackNetworkError(configuration, errorObservable) {
   startXhrProxy().onRequestComplete(function (context) {

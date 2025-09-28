@@ -44,6 +44,33 @@ export var values = function values(obj) {
   });
   return results;
 };
+export var keys = function keys(obj) {
+  var results = [];
+
+  if (obj === null) {
+    return results;
+  }
+
+  each(obj, function (value, key) {
+    results[results.length] = key;
+  });
+  return results;
+};
+export var indexOf = function indexOf(arr, target) {
+  var indexOf = arr.indexOf;
+
+  if (indexOf) {
+    return indexOf.call(arr, target);
+  } else {
+    for (var i = 0; i < arr.length; i++) {
+      if (target === arr[i]) {
+        return i;
+      }
+    }
+
+    return -1;
+  }
+};
 export function round(num, decimals) {
   return +num.toFixed(decimals);
 }
@@ -665,4 +692,45 @@ export function getActivePage() {
   }
 
   return {};
+}
+export function findCommaSeparatedValue(rawString, name) {
+  var matches = rawString.match('(?:^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+  return matches ? matches[1] : undefined;
+}
+export var ONE_SECOND = 1000;
+export var ONE_MINUTE = 60 * ONE_SECOND;
+export var ONE_HOUR = 60 * ONE_MINUTE;
+export var ONE_KILO_BYTE = 1024;
+export function defineGlobal(global, name, api) {
+  global[name] = api;
+}
+export function getGlobalObject() {
+  if (typeof globalThis === 'object') {
+    return globalThis;
+  }
+
+  Object.defineProperty(Object.prototype, '_dd_temp_', {
+    get: function get() {
+      return this;
+    },
+    configurable: true
+  }); // @ts-ignore
+
+  var globalObject = _dd_temp_; // @ts-ignore
+
+  delete Object.prototype._dd_temp_;
+
+  if (typeof globalObject !== 'object') {
+    // on safari _dd_temp_ is available on window but not globally
+    // fallback on other browser globals check
+    if (typeof self === 'object') {
+      globalObject = self;
+    } else if (typeof window === 'object') {
+      globalObject = window;
+    } else {
+      globalObject = {};
+    }
+  }
+
+  return globalObject;
 }

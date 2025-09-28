@@ -118,15 +118,6 @@ export var processedMessageByDataMap = function processedMessageByDataMap(messag
         }
       });
 
-      if (message.type === RumEventType.LOGGER) {
-        // 这里处理日志类型数据自定义字段
-        each(message, function (value, key) {
-          if (filterFileds.indexOf(key) === -1 && (isNumber(value) || isString(value) || isBoolean(value))) {
-            tagsStr.push(escapeRowData(key) + '=' + escapeRowData(value));
-          }
-        });
-      }
-
       if (tagsStr.length) {
         rowStr += tagsStr.join(',');
       }

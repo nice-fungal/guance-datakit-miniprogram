@@ -10,7 +10,8 @@ export var RumEventType = {
   VIEW: 'view',
   RESOURCE: 'resource',
   APP: 'app',
-  ACTION: 'action'
+  ACTION: 'action',
+  LOGGER: 'logger'
 };
 export var RequestType = {
   XHR: 'network',
@@ -26,12 +27,11 @@ export var MpHook = {
   onLoad: 1,
   onShow: 1,
   onReady: 1,
+  render: 1,
   onPullDownRefresh: 1,
   onReachBottom: 1,
-  onShareAppMessage: 1,
   onPageScroll: 1,
   onResize: 1,
-  onTabItemTap: 1,
   onHide: 1,
   onUnload: 1
 };
@@ -42,4 +42,8 @@ export var TraceType = {
   W3C_TRACEPARENT: 'w3c_traceparent',
   SKYWALKING_V3: 'skywalking_v3',
   JAEGER: 'jaeger'
+};
+export var ErrorHandling = {
+  HANDLED: 'handled',
+  UNHANDLED: 'unhandled'
 };

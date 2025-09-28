@@ -15,8 +15,6 @@ export function rewritePage(configuration, lifeCycle) {
       var userDefinedMethod = page[methodName];
 
       page[methodName] = function () {
-        console.log(methodName, 'methodName page');
-
         if (methodName === 'onShow' || methodName === 'onLoad') {
           if (typeof currentView === 'undefined') {
             var activePage = getActivePage();
@@ -31,6 +29,7 @@ export function rewritePage(configuration, lifeCycle) {
 
           if (methodName === 'onUnload' || methodName === 'onHide') {
             currentView.end();
+            currentView = undefined;
           }
         }
 

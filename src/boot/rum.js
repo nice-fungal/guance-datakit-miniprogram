@@ -12,13 +12,16 @@ import { startAppCollection } from '../rumEventsCollection/app/appCollection';
 import { startPagePerformanceObservable } from '../rumEventsCollection/performanceCollection';
 import { startSetDataColloction } from '../rumEventsCollection/setDataCollection';
 import { startActionCollection } from '../rumEventsCollection/action/actionCollection';
+import { startInternalContext } from '../rumEventsCollection/internalContext';
 import { sdk } from '../core/sdk';
+import { sessionManagement } from '../core/sessionManagement';
 export var startRum = function startRum(userConfiguration, getCommonContext) {
   var configuration = commonInit(userConfiguration, buildEnv);
   var lifeCycle = new LifeCycle();
   var parentContexts = startParentContexts(lifeCycle);
   var batch = startRumBatch(configuration, lifeCycle);
-  startRumAssembly(userConfiguration.applicationId, configuration, lifeCycle, parentContexts, getCommonContext);
+  var session = new sessionManagement(configuration);
+  startRumAssembly(userConfiguration.applicationId, configuration, session, lifeCycle, parentContexts, getCommonContext);
   startAppCollection(lifeCycle, configuration);
   startResourceCollection(lifeCycle, configuration);
   startViewCollection(lifeCycle, configuration);
@@ -27,4 +30,8 @@ export var startRum = function startRum(userConfiguration, getCommonContext) {
   startPagePerformanceObservable(lifeCycle, configuration);
   startSetDataColloction(lifeCycle);
   startActionCollection(lifeCycle, configuration);
+  var internalContext = startInternalContext(userConfiguration.applicationId, session, parentContexts);
+  return {
+    getInternalContext: internalContext.get
+  };
 };

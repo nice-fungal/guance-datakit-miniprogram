@@ -4,7 +4,6 @@ import { CLIENT_ID_TOKEN } from '../helper/enums';
 
 class BaseInfo {
   constructor() {
-    this.sessionId = UUID();
     this.getDeviceInfo();
     this.getNetWork();
   }
@@ -57,10 +56,6 @@ class BaseInfo {
     sdk.onNetworkStatusChange(e => {
       this.deviceInfo.network = e.networkType ? e.networkType : 'unknown';
     });
-  }
-
-  getSessionId() {
-    return this.sessionId;
   }
 
 }

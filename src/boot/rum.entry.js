@@ -1,9 +1,11 @@
-import { isPercentage, extend2Lev, createContextManager } from '../helper/utils';
+import { isPercentage, extend2Lev, createContextManager, defineGlobal, getGlobalObject } from '../helper/utils';
 import { startRum } from './rum';
 export var makeRum = function makeRum(startRumImpl) {
   var isAlreadyInitialized = false;
   var globalContextManager = createContextManager();
   var user = {};
+
+  var _getInternalContext = function getInternalContext() {};
 
   function clonedCommonContext() {
     return extend2Lev({}, {
@@ -22,13 +24,18 @@ export var makeRum = function makeRum(startRumImpl) {
         return;
       }
 
-      startRumImpl(userConfiguration, function () {
+      var _startRumImpl = startRumImpl(userConfiguration, function () {
         return {
           user: user,
           context: globalContextManager.get()
         };
       });
+
+      _getInternalContext = _startRumImpl.getInternalContext;
       isAlreadyInitialized = true;
+    },
+    getInternalContext: function getInternalContext(startTime) {
+      return _getInternalContext(startTime);
     },
     addRumGlobalContext: globalContextManager.add,
     removeRumGlobalContext: globalContextManager.remove,
@@ -96,3 +103,4 @@ export var makeRum = function makeRum(startRumImpl) {
   }
 };
 export var datafluxRum = makeRum(startRum);
+defineGlobal(getGlobalObject(), 'DATAFLUX_RUM_MIN', datafluxRum);

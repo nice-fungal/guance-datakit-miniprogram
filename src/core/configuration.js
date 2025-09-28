@@ -66,6 +66,10 @@ export function commonInit(userConfiguration, buildEnv) {
     transportConfiguration.traceType = userConfiguration.traceType;
   }
 
+  if ('sampleRate' in userConfiguration) {
+    transportConfiguration.sampleRate = userConfiguration.sampleRate;
+  }
+
   return extend2Lev(DEFAULT_CONFIGURATION, transportConfiguration);
 }
 
