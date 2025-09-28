@@ -85,5 +85,6 @@ var haveSameOrigin = function haveSameOrigin(url1, url2) {
 };
 
 export function isIntakeRequest(url, configuration) {
-  return haveSameOrigin(url, configuration.datakitUrl);
+  // return haveSameOrigin(url, configuration.datakitUrl)
+  return url.indexOf(configuration.datakitUrl) === 0;
 }
