@@ -21,8 +21,6 @@ export function rewriteApp(configuration, lifeCycle) {
       var userDefinedMethod = app[methodName]; // 暂存用户定义的方法
 
       app[methodName] = function (options) {
-        console.log(methodName, 'methodName app');
-
         if (methodName === 'onLaunch') {
           appInfo.isStartUp = true;
           appInfo.isHide = false;

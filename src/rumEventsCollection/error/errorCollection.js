@@ -1,13 +1,10 @@
 import { startAutomaticErrorCollection } from '../../core/errorCollection';
 import { RumEventType } from '../../helper/enums';
 import { LifeCycleEventType } from '../../core/lifeCycle';
-import { urlParse, replaceNumberCharByPath, getStatusGroup, extend2Lev } from '../../helper/utils';
+import { ErrorSource, formatUnknownError } from '../../core/errorTools';
+import { urlParse, replaceNumberCharByPath, getStatusGroup, extend2Lev, extend, now } from '../../helper/utils';
+import { computeStackTrace } from '../../helper/tracekit';
 export function startErrorCollection(lifeCycle, configuration) {
-  // return doStartErrorCollection(
-  // 	lifeCycle,
-  // 	configuration,
-  // 	startAutomaticErrorCollection(configuration),
-  // )
   startAutomaticErrorCollection(configuration).subscribe(function (error) {
     lifeCycle.notify(LifeCycleEventType.RAW_ERROR_COLLECTED, {
       error: error
@@ -20,27 +17,24 @@ export function doStartErrorCollection(lifeCycle) {
     lifeCycle.notify(LifeCycleEventType.RAW_RUM_EVENT_COLLECTED, processError(error.error));
   });
   return {
-    addError: function addError(customError, savedCommonContext) {// var rawError = computeRawError(
-      //   customError.error,
-      //   customError.startTime,
-      //   customError.source
-      // )
-      // lifeCycle.notify(LifeCycleEventType.RAW_ERROR_COLLECTED, {
-      //   customerContext: customError.context,
-      //   savedCommonContext: savedCommonContext,
-      //   error: rawError
-      // })
+    addError: function addError(customError, savedCommonContext) {
+      var rawError = computeRawError(customError.error, customError.startTime, customError.context);
+      lifeCycle.notify(LifeCycleEventType.RAW_ERROR_COLLECTED, {
+        savedCommonContext: savedCommonContext,
+        error: rawError
+      });
     }
   };
-} // function computeRawError(error, handlingStack, startClocks) {
-//   const stackTrace = error instanceof Error ? computeStackTrace(error) : undefined
-//   return extend({
-//     startClocks,
-//     source: ErrorSource.CUSTOM,
-//     originalError: error,
-//     handling: ErrorHandling.HANDLED
-//   }, formatUnknownError(stackTrace, error, 'Provided', handlingStack) )
-// }
+}
+
+function computeRawError(error, startTime, context) {
+  var stackTrace = error instanceof Error ? computeStackTrace(error) : undefined;
+  return extend({
+    startTime,
+    source: ErrorSource.CUSTOM,
+    context
+  }, formatUnknownError(stackTrace, error, 'Provided'));
+}
 
 function processError(error) {
   var resource = error.resource;
@@ -73,6 +67,7 @@ function processError(error) {
     type: RumEventType.ERROR
   }, tracingInfo);
   return {
+    customerContext: error.context,
     rawRumEvent: rawRumEvent,
     startTime: error.startTime
   };

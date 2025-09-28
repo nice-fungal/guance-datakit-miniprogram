@@ -1,7 +1,8 @@
 import { findByPath, escapeRowData, isNumber, each, isString, values, extend, isObject, isEmptyObject, isArray, escapeRowField, escapeJsonValue, toServerDuration } from '../helper/utils';
+import { computeBytesCount } from '../helper/byteUtils';
 import { sdk } from '../core/sdk';
 import { LifeCycleEventType } from '../core/lifeCycle';
-import { commonTags, dataMap } from './dataMap'; // https://en.wikipedia.org/wiki/UTF-8
+import { commonTags, dataMap, commonFields } from './dataMap'; // https://en.wikipedia.org/wiki/UTF-8
 
 var HAS_MULTI_BYTES_CHARACTERS = /[^\u0000-\u007F]/;
 var CUSTOM_KEYS = 'custom_keys';
@@ -19,10 +20,15 @@ var httpRequest = function httpRequest(endpointUrl, bytesLimit) {
 httpRequest.prototype = {
   send: function send(data) {
     var url = addBatchPrecision(this.endpointUrl);
-    sdk.request({
+    var request = sdk.request || sdk.httpRequest;
+    request({
       method: 'POST',
       header: {
         'content-type': 'text/plain;charset=UTF-8'
+      },
+      headers: {
+        'content-type': 'text/plain;charset=UTF-8' // 兼容其他
+
       },
       url,
       data
@@ -64,8 +70,9 @@ export var processedMessageByDataMap = function processedMessageByDataMap(messag
           tagsStr.push(escapeRowData(_key) + '=' + escapeRowData(_value));
         }
       });
+      var fields = extend({}, commonFields, value.fields);
       var fieldsStr = [];
-      each(value.fields, function (_value, _key) {
+      each(fields, function (_value, _key) {
         if (isArray(_value) && _value.length === 2) {
           var type = _value[0],
               value_path = _value[1];
@@ -170,31 +177,6 @@ batch.prototype = {
   processSendData: function processSendData(message) {
     return processedMessageByDataMap(message).rowStr;
   },
-  sizeInBytes: function sizeInBytes(candidate) {
-    // Accurate byte size computations can degrade performances when there is a lot of events to process
-    if (!HAS_MULTI_BYTES_CHARACTERS.test(candidate)) {
-      return candidate.length;
-    }
-
-    var total = 0,
-        charCode; // utf-8编码
-
-    for (var i = 0, len = candidate.length; i < len; i++) {
-      charCode = candidate.charCodeAt(i);
-
-      if (charCode <= 0x007f) {
-        total += 1;
-      } else if (charCode <= 0x07ff) {
-        total += 2;
-      } else if (charCode <= 0xffff) {
-        total += 3;
-      } else {
-        total += 4;
-      }
-    }
-
-    return total;
-  },
   addOrUpdate: function addOrUpdate(message, key) {
     var process = this.process(message);
     if (!process.processedMessage || process.processedMessage === '') return;
@@ -220,7 +202,7 @@ batch.prototype = {
   },
   process: function process(message) {
     var processedMessage = this.processSendData(message);
-    var messageBytesSize = this.sizeInBytes(processedMessage);
+    var messageBytesSize = computeBytesCount(processedMessage);
     return {
       processedMessage: processedMessage,
       messageBytesSize: messageBytesSize
@@ -244,7 +226,7 @@ batch.prototype = {
   remove: function remove(key) {
     var removedMessage = this.upsertBuffer[key];
     delete this.upsertBuffer[key];
-    var messageBytesSize = this.sizeInBytes(removedMessage);
+    var messageBytesSize = computeBytesCount(removedMessage);
     this.bufferBytesSize -= messageBytesSize;
     this.bufferMessageCount -= 1;
 

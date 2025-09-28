@@ -19,6 +19,11 @@ export function startRumAssembly(applicationId, configuration, session, lifeCycl
     var deviceContext = {
       device: baseInfo.deviceInfo
     };
+    var appContext = {
+      app: {
+        launch: baseInfo.getLaunchOptions()
+      }
+    };
 
     if (session.isTracked() && (viewContext || rawRumEvent.type === RumEventType.APP)) {
       var actionContext = parentContexts.findAction(startTime);
@@ -46,7 +51,7 @@ export function startRumAssembly(applicationId, configuration, session, lifeCycl
           is_signin: configuration.user_id ? 'T' : 'F'
         }
       };
-      var rumEvent = extend2Lev(rumContext, deviceContext, viewContext, actionContext, rawRumEvent);
+      var rumEvent = extend2Lev(rumContext, deviceContext, appContext, viewContext, actionContext, rawRumEvent);
       var serverRumEvent = withSnakeCaseKeys(rumEvent);
       var context = extend2Lev({}, commonContext.context, customerContext);
 

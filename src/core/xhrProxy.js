@@ -25,14 +25,19 @@ export function resetXhrProxy() {
     xhrProxySingleton = undefined;
     beforeSendCallbacks.splice(0, beforeSendCallbacks.length);
     onRequestCompleteCallbacks.splice(0, onRequestCompleteCallbacks.length);
-    sdk.request = originalXhrRequest;
+
+    if (typeof sdk.request === 'function') {
+      sdk.request = originalXhrRequest;
+    } else if (typeof sdk.httpRequest === 'function') {
+      sdk.httpRequest = originalXhrRequest;
+    }
   }
 }
 
 function proxyXhr() {
-  originalXhrRequest = sdk.request;
+  originalXhrRequest = sdk.request || sdk.httpRequest;
 
-  sdk.request = function () {
+  var request = function request() {
     var _this = this;
 
     var dataflux_xhr = {
@@ -87,4 +92,10 @@ function proxyXhr() {
     });
     return originalXhrRequest.call(this, dataflux_xhr.option);
   };
+
+  if (typeof sdk.request === 'function') {
+    sdk.request = request;
+  } else if (typeof sdk.httpRequest === 'function') {
+    sdk.httpRequest = request;
+  }
 }

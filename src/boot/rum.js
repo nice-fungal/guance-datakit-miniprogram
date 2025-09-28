@@ -13,7 +13,6 @@ import { startPagePerformanceObservable } from '../rumEventsCollection/performan
 import { startSetDataColloction } from '../rumEventsCollection/setDataCollection';
 import { startActionCollection } from '../rumEventsCollection/action/actionCollection';
 import { startInternalContext } from '../rumEventsCollection/internalContext';
-import { sdk } from '../core/sdk';
 import { sessionManagement } from '../core/sessionManagement';
 export var startRum = function startRum(userConfiguration, getCommonContext) {
   var configuration = commonInit(userConfiguration, buildEnv);
@@ -25,7 +24,9 @@ export var startRum = function startRum(userConfiguration, getCommonContext) {
   startAppCollection(lifeCycle, configuration);
   startResourceCollection(lifeCycle, configuration);
   startViewCollection(lifeCycle, configuration);
-  startErrorCollection(lifeCycle, configuration);
+
+  var _startErrorCollection = startErrorCollection(lifeCycle, configuration);
+
   startRequestCollection(lifeCycle, configuration);
   startPagePerformanceObservable(lifeCycle, configuration);
   startSetDataColloction(lifeCycle);
@@ -35,6 +36,7 @@ export var startRum = function startRum(userConfiguration, getCommonContext) {
   var internalContext = startInternalContext(userConfiguration.applicationId, session, parentContexts);
   return {
     addAction: _startActionCollection.addAction,
+    addError: _startErrorCollection.addError,
     getInternalContext: internalContext.get
   };
 };

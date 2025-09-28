@@ -1,14 +1,42 @@
-import { isPercentage, extend2Lev, createContextManager, defineGlobal, getGlobalObject, now, isString, isObject } from '../helper/utils';
+import { isPercentage, extend2Lev, defineGlobal, getGlobalObject, now, deepClone } from '../helper/utils';
 import { startRum } from './rum';
 import { ActionType } from '../helper/enums';
+import { buildCommonContext } from '../helper/commonContext';
+import { BoundedBuffer } from '../core/boundedBuffer';
+import { createContextManager } from '../core/contextManager';
+import { CustomerDataType } from '../core/heavyCustomerDataWarning';
+import { checkUser, sanitizeUser } from '../core/user';
+import { sdk } from '../core/sdk';
 export var makeRum = function makeRum(startRumImpl) {
   var isAlreadyInitialized = false;
-  var globalContextManager = createContextManager();
-  var user = {};
+  var globalContextManager = createContextManager(CustomerDataType.GlobalContext);
+  var userContextManager = createContextManager(CustomerDataType.User); //   var user = {}
 
-  var _getInternalContext = function getInternalContext() {};
+  var getInternalContextStrategy = function getInternalContextStrategy() {
+    return undefined;
+  };
 
-  var addActionStrategy = function addActionStrategy() {};
+  var bufferApiCalls = new BoundedBuffer();
+
+  var _addActionStrategy = function addActionStrategy(action, commonContext) {
+    if (typeof commonContext == 'undefined') {
+      commonContext = buildCommonContext(globalContextManager, userContextManager);
+    }
+
+    bufferApiCalls.add(function () {
+      return _addActionStrategy(action, commonContext);
+    });
+  };
+
+  var _addErrorStrategy = function addErrorStrategy(providedError, commonContext) {
+    if (typeof commonContext == 'undefined') {
+      commonContext = buildCommonContext(globalContextManager, userContextManager);
+    }
+
+    bufferApiCalls.add(function () {
+      return _addErrorStrategy(providedError, commonContext);
+    });
+  };
 
   var rumGlobal = {
     init: function init(userConfiguration) {
@@ -21,49 +49,61 @@ export var makeRum = function makeRum(startRumImpl) {
       }
 
       var _startRumImpl = startRumImpl(userConfiguration, function () {
-        return {
-          user: user,
-          context: globalContextManager.get()
-        };
+        return buildCommonContext(globalContextManager, userContextManager);
       });
 
-      _getInternalContext = _startRumImpl.getInternalContext;
-      addActionStrategy = _startRumImpl.addAction;
+      getInternalContextStrategy = _startRumImpl.getInternalContext;
+      _addActionStrategy = _startRumImpl.addAction;
+      _addErrorStrategy = _startRumImpl.addError;
+      bufferApiCalls.drain();
       isAlreadyInitialized = true;
     },
     getInternalContext: function getInternalContext(startTime) {
-      return _getInternalContext(startTime);
+      return getInternalContextStrategy(startTime);
     },
-    addRumGlobalContext: globalContextManager.add,
-    removeRumGlobalContext: globalContextManager.remove,
-    getRumGlobalContext: globalContextManager.get,
-    setRumGlobalContext: globalContextManager.set,
+    addRumGlobalContext: globalContextManager.setContextProperty,
+    removeRumGlobalContext: globalContextManager.removeContextProperty,
+    getRumGlobalContext: globalContextManager.getContext,
+    setRumGlobalContext: globalContextManager.setContext,
+    clearRumGlobalContext: globalContextManager.clearContext,
     addAction: function addAction(name, context) {
-      if (isObject(context) && isString(name)) {
-        addActionStrategy({
-          name: name,
-          context: extend2Lev({}, context),
-          startClocks: now(),
-          type: ActionType.custom
-        });
-      }
+      _addActionStrategy({
+        name: name,
+        context: deepClone(context),
+        startClocks: now(),
+        type: ActionType.custom
+      });
     },
+    addError: function addError(error, context) {
+      _addErrorStrategy({
+        error: error,
+        context: extend2Lev({}, context),
+        startTime: now()
+      });
+    },
+    setUserProperty: function setUserProperty(key, property) {
+      var newUser = {};
+      newUser[key] = property;
+      var sanitizedProperty = sanitizeUser(newUser)[key];
+      userContextManager.setContextProperty(key, sanitizedProperty);
+    },
+    removeUserProperty: userContextManager.removeContextProperty,
     setUser: function setUser(newUser) {
-      var sanitizedUser = sanitizeUser(newUser);
-
-      if (sanitizedUser) {
-        user = sanitizedUser;
-      } else {
-        console.error('Unsupported user:', newUser);
+      if (checkUser(newUser)) {
+        userContextManager.setContext(sanitizeUser(newUser));
       }
     },
-    removeUser: function removeUser() {
-      user = {};
-    }
+    getUser: userContextManager.getContext,
+    removeUser: userContextManager.clearContext
   };
   return rumGlobal;
 
   function canInitRum(userConfiguration) {
+    if (!sdk) {
+      console.error('DATAFLUX_RUM unsupport platform, Fail to start.');
+      return false;
+    }
+
     if (isAlreadyInitialized) {
       console.error('DATAFLUX_RUM is already initialized.');
       return false;
@@ -85,28 +125,6 @@ export var makeRum = function makeRum(startRumImpl) {
     }
 
     return true;
-  }
-
-  function sanitizeUser(newUser) {
-    if (typeof newUser !== 'object' || !newUser) {
-      return;
-    }
-
-    var result = extend2Lev({}, newUser);
-
-    if ('id' in result) {
-      result.id = String(result.id);
-    }
-
-    if ('name' in result) {
-      result.name = String(result.name);
-    }
-
-    if ('email' in result) {
-      result.email = String(result.email);
-    }
-
-    return result;
   }
 };
 export var datafluxRum = makeRum(startRum);

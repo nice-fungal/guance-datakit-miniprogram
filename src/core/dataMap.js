@@ -29,6 +29,10 @@ export var commonTags = {
   view_name: 'page.route',
   view_referer: 'page.referer'
 };
+export var commonFields = {
+  app_launch_query: 'app.launch.query',
+  app_launch_referrer_info: 'app.launch.referrer_info'
+};
 export var dataMap = {
   view: {
     type: RumEventType.VIEW,

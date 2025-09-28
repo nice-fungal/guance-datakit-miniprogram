@@ -81,6 +81,7 @@ export var report = function reportModuleWrapper() {
     installGlobalUnhandledRejectionHandler();
     installGlobalOnPageNotFoundHandler();
     installGlobalOnMemoryWarningHandler();
+    installGlobalOnLazyLoadErrorHandler();
     handlers.push(handler);
   }
   /**
@@ -128,7 +129,8 @@ export var report = function reportModuleWrapper() {
   var onErrorHandlerInstalled;
   var onUnhandledRejectionHandlerInstalled;
   var onPageNotFoundHandlerInstalled;
-  var onOnMemoryWarningHandlerInstalled;
+  var onMemoryWarningHandlerInstalled;
+  var onLazyLoadErrorHandlerInstalled;
   /**
    * Ensures all global unhandled exceptions are recorded.
    * Supported by Gecko and IE.
@@ -261,7 +263,7 @@ export var report = function reportModuleWrapper() {
   }
 
   function installGlobalOnMemoryWarningHandler() {
-    if (onOnMemoryWarningHandlerInstalled || !sdk.onMemoryWarning) {
+    if (onMemoryWarningHandlerInstalled || !sdk.onMemoryWarning) {
       return;
     }
 
@@ -294,7 +296,23 @@ export var report = function reportModuleWrapper() {
         name: '内存不足告警'
       }, true, {});
     });
-    onOnMemoryWarningHandlerInstalled = true;
+    onMemoryWarningHandlerInstalled = true;
+  }
+
+  function installGlobalOnLazyLoadErrorHandler() {
+    if (onLazyLoadErrorHandlerInstalled || !sdk.onLazyLoadError) {
+      return;
+    }
+
+    sdk.onLazyLoadError(res => {
+      var subpackage = res.subpackage || [];
+      notifyHandlers({
+        message: res.errMsg || '',
+        type: 'lazyloaderror',
+        name: subpackage.join(',') + 'load error'
+      }, true, {});
+    });
+    onLazyLoadErrorHandlerInstalled = true;
   }
   /**
    * Reports an unhandled Error.

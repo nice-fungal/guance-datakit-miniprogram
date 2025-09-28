@@ -1,4 +1,5 @@
 import { MpHook } from './enums';
+import { jsonStringify } from '../helper/jsonStringify';
 var ArrayProto = Array.prototype;
 var ObjProto = Object.prototype;
 var ObjProto = Object.prototype;
@@ -153,50 +154,6 @@ export var areInOrder = function areInOrder() {
 export function UUID(placeholder) {
   return placeholder ? // tslint:disable-next-line no-bitwise
   (parseInt(placeholder, 10) ^ Math.random() * 16 >> parseInt(placeholder, 10) / 4).toString(16) : "".concat(1e7, "-", 1e3, "-", 4e3, "-", 8e3, "-", 1e11).replace(/[018]/g, UUID);
-}
-export function jsonStringify(value, replacer, space) {
-  if (value === null || value === undefined) {
-    return JSON.stringify(value);
-  }
-
-  var originalToJSON = [false, undefined];
-
-  if (hasToJSON(value)) {
-    // We need to add a flag and not rely on the truthiness of value.toJSON
-    // because it can be set but undefined and that's actually significant.
-    originalToJSON = [true, value.toJSON];
-    delete value.toJSON;
-  }
-
-  var originalProtoToJSON = [false, undefined];
-  var prototype;
-
-  if (typeof value === 'object') {
-    prototype = Object.getPrototypeOf(value);
-
-    if (hasToJSON(prototype)) {
-      originalProtoToJSON = [true, prototype.toJSON];
-      delete prototype.toJSON;
-    }
-  }
-
-  var result;
-
-  try {
-    result = JSON.stringify(value, undefined, space);
-  } catch (e) {
-    result = '<error: unable to serialize object>';
-  } finally {
-    if (originalToJSON[0]) {
-      value.toJSON = originalToJSON[1];
-    }
-
-    if (originalProtoToJSON[0]) {
-      prototype.toJSON = originalProtoToJSON[1];
-    }
-  }
-
-  return result;
 }
 export var utf8Encode = function utf8Encode(string) {
   string = (string + '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
@@ -419,49 +376,42 @@ export var safeJSONParse = function safeJSONParse(str) {
 export var now = Date.now || function () {
   return new Date().getTime();
 };
-export var throttle = function throttle(func, wait, options) {
-  var timeout, context, args, result;
-  var previous = 0;
-  if (!options) options = {};
-
-  var later = function later() {
-    previous = options.leading === false ? 0 : new Date().getTime();
-    timeout = null;
-    result = func.apply(context, args);
-    if (!timeout) context = args = null;
-  };
-
-  var throttled = function throttled() {
-    args = arguments;
-    var now = new Date().getTime();
-    if (!previous && options.leading === false) previous = now; //下次触发 func 剩余的时间
-
-    var remaining = wait - (now - previous);
-    context = this; // 如果没有剩余的时间了或者你改了系统时间
-
-    if (remaining <= 0 || remaining > wait) {
-      if (timeout) {
-        clearTimeout(timeout);
-        timeout = null;
+export var throttle = function throttle(fn, wait, options) {
+  var needLeadingExecution = options && options.leading !== undefined ? options.leading : true;
+  var needTrailingExecution = options && options.trailing !== undefined ? options.trailing : true;
+  var inWaitPeriod = false;
+  var pendingExecutionWithParameters;
+  var pendingTimeoutId;
+  var context = this;
+  return {
+    throttled: function throttled() {
+      if (inWaitPeriod) {
+        pendingExecutionWithParameters = arguments;
+        return;
       }
 
-      previous = now;
-      result = func.apply(context, args);
-      if (!timeout) context = args = null;
-    } else if (!timeout && options.trailing !== false) {
-      timeout = setTimeout(later, remaining);
+      if (needLeadingExecution) {
+        fn.apply(context, arguments);
+      } else {
+        pendingExecutionWithParameters = arguments;
+      }
+
+      inWaitPeriod = true;
+      pendingTimeoutId = setTimeout(function () {
+        if (needTrailingExecution && pendingExecutionWithParameters) {
+          fn.apply(context, pendingExecutionWithParameters);
+        }
+
+        inWaitPeriod = false;
+        pendingExecutionWithParameters = undefined;
+      }, wait);
+    },
+    cancel: function cancel() {
+      clearTimeout(pendingTimeoutId);
+      inWaitPeriod = false;
+      pendingExecutionWithParameters = undefined;
     }
-
-    return result;
   };
-
-  throttled.cancel = function () {
-    clearTimeout(timeout);
-    previous = 0;
-    timeout = null;
-  };
-
-  return throttled;
 };
 export function noop() {}
 /**
@@ -689,31 +639,6 @@ export var deepMixObject = function deepMixObject(targetObj) {
 export function getOrigin(url) {
   return urlParse(url).getParse().Origin;
 }
-export function createContextManager() {
-  var context = {};
-  return {
-    get: function get() {
-      return context;
-    },
-    add: function add(key, value) {
-      if (isString(key)) {
-        context[key] = value;
-      } else {
-        console.error('key 需要传递字符串类型');
-      }
-    },
-    remove: function remove(key) {
-      delete context[key];
-    },
-    set: function set(newContext) {
-      if (isObject(newContext)) {
-        context = newContext;
-      } else {
-        console.error('content 需要传递对象类型数据');
-      }
-    }
-  };
-}
 export function getActivePage() {
   var curPages = typeof getCurrentPages === 'function' ? getCurrentPages() : [];
 
@@ -727,10 +652,114 @@ export function findCommaSeparatedValue(rawString, name) {
   var matches = rawString.match('(?:^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
   return matches ? matches[1] : undefined;
 }
+
+function createCircularReferenceChecker() {
+  if (typeof WeakSet !== 'undefined') {
+    var set = new WeakSet();
+    return {
+      hasAlreadyBeenSeen: function hasAlreadyBeenSeen(value) {
+        var has = set.has(value);
+
+        if (!has) {
+          set.add(value);
+        }
+
+        return has;
+      }
+    };
+  }
+
+  var array = [];
+  return {
+    hasAlreadyBeenSeen: function hasAlreadyBeenSeen(value) {
+      var has = array.indexOf(value) >= 0;
+
+      if (!has) {
+        array.push(value);
+      }
+
+      return has;
+    }
+  };
+}
+/**
+ * Similar to `typeof`, but distinguish plain objects from `null` and arrays
+ */
+
+
+export function getType(value) {
+  if (value === null) {
+    return 'null';
+  }
+
+  if (Array.isArray(value)) {
+    return 'array';
+  }
+
+  return typeof value;
+}
+/**
+ * Iterate over source and affect its sub values into destination, recursively.
+ * If the source and destination can't be merged, return source.
+ */
+
+export function mergeInto(destination, source, circularReferenceChecker) {
+  // ignore the source if it is undefined
+  if (typeof circularReferenceChecker === 'undefined') {
+    circularReferenceChecker = createCircularReferenceChecker();
+  }
+
+  if (source === undefined) {
+    return destination;
+  }
+
+  if (typeof source !== 'object' || source === null) {
+    // primitive values - just return source
+    return source;
+  } else if (source instanceof Date) {
+    return new Date(source.getTime());
+  } else if (source instanceof RegExp) {
+    var flags = source.flags || // old browsers compatibility
+    [source.global ? 'g' : '', source.ignoreCase ? 'i' : '', source.multiline ? 'm' : '', source.sticky ? 'y' : '', source.unicode ? 'u' : ''].join('');
+    return new RegExp(source.source, flags);
+  }
+
+  if (circularReferenceChecker.hasAlreadyBeenSeen(source)) {
+    // remove circular references
+    return undefined;
+  } else if (Array.isArray(source)) {
+    var merged = Array.isArray(destination) ? destination : [];
+
+    for (var i = 0; i < source.length; ++i) {
+      merged[i] = mergeInto(merged[i], source[i], circularReferenceChecker);
+    }
+
+    return merged;
+  }
+
+  var merged = getType(destination) === 'object' ? destination : {};
+
+  for (var key in source) {
+    if (Object.prototype.hasOwnProperty.call(source, key)) {
+      merged[key] = mergeInto(merged[key], source[key], circularReferenceChecker);
+    }
+  }
+
+  return merged;
+}
+/**
+ * A simplistic implementation of a deep clone algorithm.
+ * Caveats:
+ * - It doesn't maintain prototype chains - don't use with instances of custom classes.
+ * - It doesn't handle Map and Set
+ */
+
+export function deepClone(value) {
+  return mergeInto(undefined, value);
+}
 export var ONE_SECOND = 1000;
 export var ONE_MINUTE = 60 * ONE_SECOND;
 export var ONE_HOUR = 60 * ONE_MINUTE;
-export var ONE_KILO_BYTE = 1024;
 export function defineGlobal(global, name, api) {
   global[name] = api;
 }

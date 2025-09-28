@@ -1,6 +1,7 @@
 import { computePerformanceResourceDuration, computePerformanceResourceDetails, computeSize } from './resourceUtils';
 import { LifeCycleEventType } from '../../core/lifeCycle';
-import { msToNs, extend2Lev, urlParse, getQueryParamsFromUrl, replaceNumberCharByPath, jsonStringify, getStatusGroup, UUID } from '../../helper/utils';
+import { msToNs, extend2Lev, urlParse, getQueryParamsFromUrl, replaceNumberCharByPath, getStatusGroup, UUID } from '../../helper/utils';
+import { jsonStringify } from '../../helper/jsonStringify';
 import { RumEventType } from '../../helper/enums';
 export function startResourceCollection(lifeCycle, configuration) {
   lifeCycle.subscribe(LifeCycleEventType.REQUEST_COMPLETED, function (request) {

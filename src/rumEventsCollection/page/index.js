@@ -5,7 +5,6 @@ import { LifeCycleEventType } from '../../core/lifeCycle'; // 劫持原小程序
 export var THROTTLE_VIEW_UPDATE_PERIOD = 3000;
 export function rewritePage(configuration, lifeCycle) {
   var originPage = Page;
-  console.log(originPage, 'originPage=====');
 
   Page = function Page(page) {
     // 合并方法，插入记录脚本
@@ -67,10 +66,11 @@ function newView(lifeCycle, route, startTime) {
     startTime,
     route
   });
-  var scheduleViewUpdate = throttle(triggerViewUpdate, THROTTLE_VIEW_UPDATE_PERIOD, {
+  var scheduleViewThrottled = throttle(triggerViewUpdate, THROTTLE_VIEW_UPDATE_PERIOD, {
     leading: false
   });
-  var cancelScheduleViewUpdate = scheduleViewUpdate.cancel;
+  var scheduleViewUpdate = scheduleViewThrottled.throttled;
+  var cancelScheduleViewUpdate = scheduleViewThrottled.cancel;
 
   var _trackEventCounts = trackEventCounts(lifeCycle, function (newEventCounts) {
     eventCounts = newEventCounts;
