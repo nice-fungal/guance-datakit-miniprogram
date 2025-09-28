@@ -22,13 +22,12 @@ httpRequest.prototype = {
     request({
       method: "POST",
       header: {
-        "content-type": "text/plain;charset=UTF-8",
-        "x-client-timestamp": new Date().getTime().toString()
+        "content-type": "text/plain;charset=UTF-8"
+        // "x-client-timestamp": new Date().getTime().toString(),
       },
       headers: {
-        "content-type": "text/plain;charset=UTF-8",
-        // 兼容其他
-        "x-client-timestamp": new Date().getTime().toString()
+        "content-type": "text/plain;charset=UTF-8" // 兼容其他
+        // "x-client-timestamp": new Date().getTime().toString(),
       },
       url,
       data
