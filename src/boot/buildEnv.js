@@ -1,4 +1,4 @@
 export var buildEnv = {
-  sdkVersion: '2.1.10',
+  sdkVersion: '2.1.11',
   sdkName: 'df_miniapp_rum_sdk'
 };

@@ -54,7 +54,7 @@ function startPerformanceObservable(lifeCycle) {
 
     if (typeof launchEntity !== 'undefined') {
       lifeCycle.notify(LifeCycleEventType.APP_UPDATE, {
-        startTime: launchEntity.startTime,
+        startTime: now(),
         name: '启动',
         type: 'launch',
         id: UUID(),
@@ -66,7 +66,7 @@ function startPerformanceObservable(lifeCycle) {
 
     if (typeof scriptentity !== 'undefined') {
       lifeCycle.notify(LifeCycleEventType.APP_UPDATE, {
-        startTime: scriptentity.startTime,
+        startTime: now(),
         name: '脚本注入',
         type: 'script_insert',
         id: UUID(),
@@ -84,7 +84,7 @@ function startPerformanceObservable(lifeCycle) {
       codeDownloadDuration = launchEntity.duration - firstEntity.duration - scriptentity.duration; // 资源下载耗时
 
       lifeCycle.notify(LifeCycleEventType.APP_UPDATE, {
-        startTime: launchEntity.startTime,
+        startTime: now(),
         name: '小程序包下载',
         type: 'package_download',
         id: UUID(),
