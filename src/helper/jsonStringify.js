@@ -1,4 +1,5 @@
 import { noop } from './utils';
+
 /**
  * Custom implementation of JSON.stringify that ignores some toJSON methods. We need to do that
  * because some sites badly override toJSON on certain objects. Removing all toJSON methods from
@@ -7,19 +8,17 @@ import { noop } from './utils';
  *
  * Note: this still assumes that JSON.stringify is correct.
  */
-
 export function jsonStringify(value, replacer, space) {
   if (typeof value !== 'object' || value === null) {
     return JSON.stringify(value);
-  } // Note: The order matter here. We need to detach toJSON methods on parent classes before their
+  }
+
+  // Note: The order matter here. We need to detach toJSON methods on parent classes before their
   // subclasses.
-
-
   var restoreObjectPrototypeToJson = detachToJsonMethod(Object.prototype);
   var restoreArrayPrototypeToJson = detachToJsonMethod(Array.prototype);
   var restoreValuePrototypeToJson = detachToJsonMethod(Object.getPrototypeOf(value));
   var restoreValueToJson = detachToJsonMethod(value);
-
   try {
     return JSON.stringify(value, replacer, space);
   } catch (error) {
@@ -34,13 +33,11 @@ export function jsonStringify(value, replacer, space) {
 export function detachToJsonMethod(value) {
   var object = value;
   var objectToJson = object.toJSON;
-
   if (objectToJson) {
     delete object.toJSON;
     return () => {
       object.toJSON = objectToJson;
     };
   }
-
   return noop;
 }

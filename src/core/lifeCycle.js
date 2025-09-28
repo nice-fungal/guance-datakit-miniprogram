@@ -2,20 +2,16 @@ export class LifeCycle {
   constructor() {
     this.callbacks = {};
   }
-
   notify(eventType, data) {
     var eventCallbacks = this.callbacks[eventType];
-
     if (eventCallbacks) {
       eventCallbacks.forEach(callback => callback(data));
     }
   }
-
   subscribe(eventType, callback) {
     if (!this.callbacks[eventType]) {
       this.callbacks[eventType] = [];
     }
-
     this.callbacks[eventType].push(callback);
     return {
       unsubscribe: () => {
@@ -23,7 +19,6 @@ export class LifeCycle {
       }
     };
   }
-
 }
 export var LifeCycleEventType = {
   PERFORMANCE_ENTRY_COLLECTED: 'PERFORMANCE_ENTRY_COLLECTED',

@@ -6,7 +6,6 @@ export function startInternalContext(applicationId, session, parentContexts) {
   return {
     get: function get(startTime) {
       var viewContext = parentContexts.findView(startTime);
-
       if (session.isTracked() && viewContext) {
         var actionContext = parentContexts.findAction(startTime);
         return {

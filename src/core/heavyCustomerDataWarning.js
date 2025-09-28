@@ -1,7 +1,8 @@
-import { ONE_KIBI_BYTE } from '../helper/byteUtils'; // RUM and logs batch bytes limit is 16KB
+import { ONE_KIBI_BYTE } from '../helper/byteUtils';
+
+// RUM and logs batch bytes limit is 16KB
 // ensure that we leave room for other event attributes and maintain a decent amount of event per batch
 // (3KB (customer data) + 1KB (other attributes)) * 4 (events per batch) = 16KB
-
 export var CUSTOMER_DATA_BYTES_LIMIT = 3 * ONE_KIBI_BYTE;
 export var CustomerDataType = {
   FeatureFlag: 'feature flag evaluation',
@@ -14,6 +15,5 @@ export function warnIfCustomerDataLimitReached(bytesCount, customerDataType) {
     console.warn('The ' + customerDataType + 'data is over ' + CUSTOMER_DATA_BYTES_LIMIT / ONE_KIBI_BYTE + " KiB. On low connectivity, the SDK has the potential to exhaust the user's upload bandwidth.");
     return true;
   }
-
   return false;
 }

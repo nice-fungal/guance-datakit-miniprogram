@@ -17,7 +17,6 @@ export function startDownloadProxy() {
       }
     };
   }
-
   return downloadProxySingleton;
 }
 export function resetDownloadProxy() {
@@ -28,13 +27,10 @@ export function resetDownloadProxy() {
     sdk.downloadFile = originalDownloadRequest;
   }
 }
-
 function proxyDownload() {
   originalDownloadRequest = sdk.downloadFile;
-
   sdk.downloadFile = function () {
     var _this = this;
-
     var dataflux_xhr = {
       method: 'GET',
       startTime: 0,
@@ -44,32 +40,24 @@ function proxyDownload() {
     };
     dataflux_xhr.startTime = now();
     var originalSuccess = arguments[0].success;
-
     arguments[0].success = function () {
       reportXhr(arguments[0]);
-
       if (originalSuccess) {
         originalSuccess.apply(_this, arguments);
       }
     };
-
     var originalFail = arguments[0].fail;
-
     arguments[0].fail = function () {
       reportXhr(arguments[0]);
-
       if (originalFail) {
         originalFail.apply(_this, arguments);
       }
     };
-
     var hasBeenReported = false;
-
     var reportXhr = function reportXhr(res) {
       if (hasBeenReported) {
         return;
       }
-
       hasBeenReported = true;
       dataflux_xhr.duration = now() - dataflux_xhr.startTime;
       dataflux_xhr.response = JSON.stringify({
@@ -83,7 +71,6 @@ function proxyDownload() {
         callback(dataflux_xhr);
       });
     };
-
     beforeSendCallbacks.forEach(function (callback) {
       callback(dataflux_xhr);
     });

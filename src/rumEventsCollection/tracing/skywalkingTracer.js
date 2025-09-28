@@ -1,22 +1,20 @@
-import { base64Encode, urlParse, getActivePage } from '../../helper/utils'; // start SkyWalking
-
+import { base64Encode, urlParse, getActivePage } from '../../helper/utils';
+// start SkyWalking
 function uuid() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
     /* tslint:disable */
     var r = Math.random() * 16 | 0;
     /* tslint:disable */
-
     var v = c === 'x' ? r : r & 0x3 | 0x8;
     return v.toString(16);
   });
 }
+
 /**
  * 
  * @param {*} configuration  配置信息
  * @param {*} requestUrl 请求的url
  */
-
-
 export function SkyWalkingTracer(configuration, requestUrl) {
   this._spanId = uuid();
   this._traceId = uuid();
@@ -44,15 +42,13 @@ SkyWalkingTracer.prototype = {
       var instance = String(base64Encode(this._version));
       var activePage = getActivePage();
       var endpointPage = '';
-
       if (activePage && activePage.route) {
         endpointPage = activePage.route;
       }
-
       var endpoint = String(base64Encode(endpointPage));
       var peer = String(base64Encode(this._urlParse.Host));
-      var index = '0'; // var values = `${1}-${traceIdStr}-${segmentId}-${index}-${service}-${instance}-${endpoint}-${peer}`;
-
+      var index = '0';
+      // var values = `${1}-${traceIdStr}-${segmentId}-${index}-${service}-${instance}-${endpoint}-${peer}`;
       return '1-' + traceIdStr + '-' + segmentId + '-' + index + '-' + service + '-' + instance + '-' + endpoint + '-' + peer;
     } catch (err) {
       return '';

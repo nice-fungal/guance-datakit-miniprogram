@@ -1,31 +1,28 @@
 import { each, now } from '../helper/utils';
 import { LifeCycleEventType } from '../core/lifeCycle';
-import { Observable } from '../core/observable'; // Delay to wait for a page activity to validate the tracking process
-
-export var PAGE_ACTIVITY_VALIDATION_DELAY = 100; // Delay to wait after a page activity to end the tracking process
-
-export var PAGE_ACTIVITY_END_DELAY = 100; // Maximum duration of the tracking process
-
+import { Observable } from '../core/observable';
+// Delay to wait for a page activity to validate the tracking process
+export var PAGE_ACTIVITY_VALIDATION_DELAY = 100;
+// Delay to wait after a page activity to end the tracking process
+export var PAGE_ACTIVITY_END_DELAY = 100;
+// Maximum duration of the tracking process
 export var PAGE_ACTIVITY_MAX_DURATION = 10000;
 export function waitIdlePageActivity(lifeCycle, completionCallback) {
   var _trackPageActivities = trackPageActivities(lifeCycle);
-
   var pageActivitiesObservable = _trackPageActivities.observable;
   var stopPageActivitiesTracking = _trackPageActivities.stop;
-
   var _waitPageActivitiesCompletion = waitPageActivitiesCompletion(pageActivitiesObservable, stopPageActivitiesTracking, completionCallback);
-
   var stopWaitPageActivitiesCompletion = _waitPageActivitiesCompletion.stop;
-
   function stop() {
     stopWaitPageActivitiesCompletion();
     stopPageActivitiesTracking();
   }
-
   return {
     stop: stop
   };
-} // Automatic action collection lifecycle overview:
+}
+
+// Automatic action collection lifecycle overview:
 //                      (Start new trackPageActivities)
 //              .-------------------'--------------------.
 //              v                                        v
@@ -49,7 +46,6 @@ export function waitIdlePageActivity(lifeCycle, completionCallback) {
 //
 // Note: because MAX_DURATION > VALIDATION_DELAY, we are sure that if the process is still alive
 // after MAX_DURATION, it has been validated.
-
 export function trackPageActivities(lifeCycle) {
   var observable = new Observable();
   var subscriptions = [];
@@ -64,7 +60,6 @@ export function trackPageActivities(lifeCycle) {
     if (firstRequestIndex === undefined) {
       firstRequestIndex = startEvent.requestIndex;
     }
-
     pendingRequestsCount += 1;
     notifyPageActivity();
   }));
@@ -73,17 +68,14 @@ export function trackPageActivities(lifeCycle) {
     if (firstRequestIndex === undefined || request.requestIndex < firstRequestIndex) {
       return;
     }
-
     pendingRequestsCount -= 1;
     notifyPageActivity();
   }));
-
   function notifyPageActivity() {
     observable.notify({
       isBusy: pendingRequestsCount > 0
     });
   }
-
   return {
     observable: observable,
     stop: function stop() {
@@ -112,7 +104,6 @@ export function waitPageActivitiesCompletion(pageActivitiesObservable, stopPageA
     clearTimeout(validationTimeoutId);
     clearTimeout(idleTimeoutId);
     var lastChangeTime = now();
-
     if (!isBusy) {
       idleTimeoutId = setTimeout(function () {
         complete({
@@ -122,7 +113,6 @@ export function waitPageActivitiesCompletion(pageActivitiesObservable, stopPageA
       }, PAGE_ACTIVITY_END_DELAY);
     }
   });
-
   function stop() {
     hasCompleted = true;
     clearTimeout(validationTimeoutId);
@@ -130,16 +120,13 @@ export function waitPageActivitiesCompletion(pageActivitiesObservable, stopPageA
     clearTimeout(maxDurationTimeoutId);
     stopPageActivitiesTracking();
   }
-
   function complete(params) {
     if (hasCompleted) {
       return;
     }
-
     stop();
     completionCallback(params);
   }
-
   return {
     stop: stop
   };

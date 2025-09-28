@@ -24,7 +24,6 @@ export function startRumAssembly(applicationId, configuration, session, lifeCycl
         launch: baseInfo.getLaunchOptions()
       }
     };
-
     if (session.isTracked() && (viewContext || rawRumEvent.type === RumEventType.APP)) {
       var actionContext = parentContexts.findAction(startTime);
       var commonContext = savedCommonContext || getCommonContext();
@@ -54,11 +53,9 @@ export function startRumAssembly(applicationId, configuration, session, lifeCycl
       var rumEvent = extend2Lev(rumContext, deviceContext, appContext, viewContext, actionContext, rawRumEvent);
       var serverRumEvent = withSnakeCaseKeys(rumEvent);
       var context = extend2Lev({}, commonContext.context, customerContext);
-
       if (!isEmptyObject(context)) {
         serverRumEvent.tags = context;
       }
-
       if (!isEmptyObject(commonContext.user)) {
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         serverRumEvent.user = extend2Lev({
@@ -66,18 +63,15 @@ export function startRumAssembly(applicationId, configuration, session, lifeCycl
           is_signin: 'T'
         }, commonContext.user);
       }
-
       if (shouldSend(serverRumEvent, errorFilter)) {
         lifeCycle.notify(LifeCycleEventType.RUM_EVENT_COLLECTED, serverRumEvent);
       }
     }
   });
 }
-
 function shouldSend(event, errorFilter) {
   if (event.type === RumEventType.ERROR) {
     return !errorFilter.isLimitReached();
   }
-
   return true;
 }

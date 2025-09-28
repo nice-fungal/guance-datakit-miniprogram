@@ -10,48 +10,39 @@ import { sdk } from '../core/sdk';
 export var makeRum = function makeRum(startRumImpl) {
   var isAlreadyInitialized = false;
   var globalContextManager = createContextManager(CustomerDataType.GlobalContext);
-  var userContextManager = createContextManager(CustomerDataType.User); //   var user = {}
-
+  var userContextManager = createContextManager(CustomerDataType.User);
+  //   var user = {}
   var getInternalContextStrategy = function getInternalContextStrategy() {
     return undefined;
   };
-
   var bufferApiCalls = new BoundedBuffer();
-
   var _addActionStrategy = function addActionStrategy(action, commonContext) {
     if (typeof commonContext == 'undefined') {
       commonContext = buildCommonContext(globalContextManager, userContextManager);
     }
-
     bufferApiCalls.add(function () {
       return _addActionStrategy(action, commonContext);
     });
   };
-
   var _addErrorStrategy = function addErrorStrategy(providedError, commonContext) {
     if (typeof commonContext == 'undefined') {
       commonContext = buildCommonContext(globalContextManager, userContextManager);
     }
-
     bufferApiCalls.add(function () {
       return _addErrorStrategy(providedError, commonContext);
     });
   };
-
   var rumGlobal = {
     init: function init(userConfiguration) {
       if (typeof userConfiguration === 'undefined') {
         userConfiguration = {};
       }
-
       if (!canInitRum(userConfiguration)) {
         return;
       }
-
       var _startRumImpl = startRumImpl(userConfiguration, function () {
         return buildCommonContext(globalContextManager, userContextManager);
       });
-
       getInternalContextStrategy = _startRumImpl.getInternalContext;
       _addActionStrategy = _startRumImpl.addAction;
       _addErrorStrategy = _startRumImpl.addError;
@@ -97,33 +88,35 @@ export var makeRum = function makeRum(startRumImpl) {
     removeUser: userContextManager.clearContext
   };
   return rumGlobal;
-
   function canInitRum(userConfiguration) {
     if (!sdk) {
       console.error('DATAFLUX_RUM unsupport platform, Fail to start.');
       return false;
     }
-
     if (isAlreadyInitialized) {
       console.error('DATAFLUX_RUM is already initialized.');
       return false;
     }
-
     if (!userConfiguration.applicationId) {
       console.error('Application ID is not configured, no RUM data will be collected.');
       return false;
     }
-
-    if (!userConfiguration.datakitOrigin) {
-      console.error('datakitOrigin is not configured, no RUM data will be collected.');
+    // if (!userConfiguration.datakitOrigin) {
+    //   console.error('datakitOrigin is not configured, no RUM data will be collected.')
+    //   return false
+    // }
+    if (!userConfiguration.site && !userConfiguration.datakitOrigin && !userConfiguration.datakitUrl) {
+      console.error('datakitOrigin or site is not configured, no RUM data will be collected.');
       return false;
     }
-
+    if (userConfiguration.site && !userConfiguration.clientToken) {
+      console.error('clientToken is not configured, no RUM data will be collected.');
+      return false;
+    }
     if (userConfiguration.sampleRate !== undefined && !isPercentage(userConfiguration.sampleRate)) {
       console.error('Sample Rate should be a number between 0 and 100');
       return false;
     }
-
     return true;
   }
 };

@@ -24,15 +24,11 @@ export var startRum = function startRum(userConfiguration, getCommonContext) {
   startAppCollection(lifeCycle, configuration);
   startResourceCollection(lifeCycle, configuration);
   startViewCollection(lifeCycle, configuration);
-
   var _startErrorCollection = startErrorCollection(lifeCycle, configuration);
-
   startRequestCollection(lifeCycle, configuration);
   startPagePerformanceObservable(lifeCycle, configuration);
   startSetDataColloction(lifeCycle);
-
   var _startActionCollection = startActionCollection(lifeCycle, configuration);
-
   var internalContext = startInternalContext(userConfiguration.applicationId, session, parentContexts);
   return {
     addAction: _startActionCollection.addAction,

@@ -9,7 +9,6 @@ import { resetDownloadProxy, startDownloadProxy } from './downloadProxy';
 var originalConsoleError;
 export function startConsoleTracking(errorObservable) {
   originalConsoleError = console.error;
-
   console.error = function () {
     originalConsoleError.apply(console, arguments);
     var args = toArray(arguments);
@@ -27,19 +26,15 @@ export function startConsoleTracking(errorObservable) {
 export function stopConsoleTracking() {
   console.error = originalConsoleError;
 }
-
 function formatConsoleParameters(param) {
   if (typeof param === 'string') {
     return param;
   }
-
   if (param instanceof Error) {
     return toStackTraceString(computeStackTrace(param));
   }
-
   return JSON.stringify(param, undefined, 2);
 }
-
 export function filterErrors(configuration, errorObservable) {
   var errorCount = 0;
   var filteredErrorObservable = new Observable();
@@ -73,7 +68,6 @@ export function startRuntimeErrorTracking(errorObservable) {
       startTime: now()
     });
   };
-
   report.subscribe(traceKitReportHandler);
 }
 export function stopRuntimeErrorTracking() {
@@ -85,7 +79,8 @@ export function startAutomaticErrorCollection(configuration) {
     errorObservable = new Observable();
     trackNetworkError(configuration, errorObservable);
     startConsoleTracking(errorObservable);
-    startRuntimeErrorTracking(errorObservable); // filteredErrorsObservable = filterErrors(configuration, errorObservable)
+    startRuntimeErrorTracking(errorObservable);
+    // filteredErrorsObservable = filterErrors(configuration, errorObservable)
   }
 
   return errorObservable;
@@ -97,7 +92,6 @@ export function trackNetworkError(configuration, errorObservable) {
   startDownloadProxy().onRequestComplete(function (context) {
     return handleCompleteRequest(context.type, context);
   });
-
   function handleCompleteRequest(type, request) {
     if (!isIntakeRequest(request.url, configuration) && (isRejected(request) || isServerError(request))) {
       errorObservable.notify({
@@ -116,7 +110,6 @@ export function trackNetworkError(configuration, errorObservable) {
       });
     }
   }
-
   return {
     stop: function stop() {
       resetXhrProxy();
@@ -124,27 +117,21 @@ export function trackNetworkError(configuration, errorObservable) {
     }
   };
 }
-
 function isRejected(request) {
   return request.status === 0 && request.responseType !== 'opaque';
 }
-
 function isServerError(request) {
   return request.status >= 500;
 }
-
 function truncateResponse(response, configuration) {
   if (response && response.length > configuration.requestErrorResponseLengthLimit) {
     return response.substring(0, configuration.requestErrorResponseLengthLimit) + '...';
   }
-
   return response;
 }
-
 function format(type) {
   if (RequestType.XHR === type) {
     return 'XHR';
   }
-
   return RequestType.DOWNLOAD;
 }

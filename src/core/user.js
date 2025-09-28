@@ -1,10 +1,10 @@
 import { extend, getType, each } from '../helper/utils';
+
 /**
  * Clone input data and ensure known user properties (id, name, email)
  * are strings, as defined here:
  * https://docs.datadoghq.com/logs/log_configuration/attributes_naming_convention/#user-related-attributes
  */
-
 export function sanitizeUser(newUser) {
   // We shallow clone only to prevent mutation of user data.
   var user = extend({}, newUser);
@@ -16,16 +16,14 @@ export function sanitizeUser(newUser) {
   });
   return user;
 }
+
 /**
  * Simple check to ensure user is valid
  */
-
 export function checkUser(newUser) {
   var isValid = getType(newUser) === 'object';
-
   if (!isValid) {
     console.error('Unsupported user:', newUser);
   }
-
   return isValid;
 }

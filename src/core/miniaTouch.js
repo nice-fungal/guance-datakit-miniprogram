@@ -1,9 +1,8 @@
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typeof key === "symbol" ? key : String(key); }
+function _toPrimitive(input, hint) { if (typeof input !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (typeof res !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
 var DEFAULT_OPTIONS = {
   touchStart: function touchStart() {},
   touchMove: function touchMove() {},
@@ -43,13 +42,11 @@ export function MinaTouch(_page, name) {
   };
   this.lastZoom = 1;
   this.tempZoom = 1;
-
   try {
     if (this._checkBeforeCreate(_page, name)) {
       this._name = name;
       this._option = _objectSpread(_objectSpread({}, DEFAULT_OPTIONS), option);
       _page[name] = this;
-
       this._bindFunc(_page);
     }
   } catch (error) {
@@ -61,16 +58,13 @@ MinaTouch.prototype = {
     if (!_page || !name) {
       throw new Error('MinaTouch实例化时，必须传入page对象和引用名');
     }
-
     if (_page[name]) {
       throw new Error('MinaTouch实例化error： ' + name + ' 已经存在page中');
     }
-
     return true;
   },
   _bindFunc: function _bindFunc(_page) {
     var funcNames = ['start', 'move', 'end', 'cancel'];
-
     for (var funcName of funcNames) {
       _page[this._name + '.' + funcName] = this[funcName].bind(this);
     }
@@ -81,24 +75,18 @@ MinaTouch.prototype = {
     this.x1 = evt.touches[0].pageX == null ? evt.touches[0].x : evt.touches[0].pageX;
     this.y1 = evt.touches[0].pageY == null ? evt.touches[0].y : evt.touches[0].pageY;
     this.delta = this.now - (this.last || this.now);
-
     this._option.touchStart(evt);
-
     if (this.preTapPosition.x !== null) {
       this.isDoubleTap = this.delta > 0 && this.delta <= 250 && Math.abs(this.preTapPosition.x - this.x1) < 30 && Math.abs(this.preTapPosition.y - this.y1) < 30;
     }
-
     this.preTapPosition.x = this.x1;
     this.preTapPosition.y = this.y1;
     this.last = this.now;
     var preV = this.preV,
-        len = evt.touches.length;
-
+      len = evt.touches.length;
     if (len > 1) {
       this._cancelLongTap();
-
       this._cancelSingleTap();
-
       var otx = evt.touches[1].pageX == null ? evt.touches[1].x : evt.touches[1].pageX;
       var oty = evt.touches[1].pageY == null ? evt.touches[1].y : evt.touches[1].pageY;
       var v = {
@@ -108,24 +96,20 @@ MinaTouch.prototype = {
       preV.x = v.x;
       preV.y = v.y;
       this.pinchStartLen = getLen(preV);
-
       this._option.multipointStart(evt);
     }
-
     this.longTapTimeout = setTimeout(function () {
       evt.type = 'longTap';
-
       this._option.longTap(evt);
     }.bind(this), 750);
   },
   move: function move(evt) {
     if (!evt.touches) return;
     var preV = this.preV,
-        len = evt.touches.length,
-        currentX = evt.touches[0].pageX == null ? evt.touches[0].x : evt.touches[0].pageX,
-        currentY = evt.touches[0].pageY == null ? evt.touches[0].y : evt.touches[0].pageY;
+      len = evt.touches.length,
+      currentX = evt.touches[0].pageX == null ? evt.touches[0].x : evt.touches[0].pageX,
+      currentY = evt.touches[0].pageY == null ? evt.touches[0].y : evt.touches[0].pageY;
     this.isDoubleTap = false;
-
     if (len > 1) {
       var otx = evt.touches[1].pageX == null ? evt.touches[1].x : evt.touches[1].pageX;
       var oty = evt.touches[1].pageY == null ? evt.touches[1].y : evt.touches[1].pageY;
@@ -133,23 +117,18 @@ MinaTouch.prototype = {
         x: otx - currentX,
         y: oty - currentY
       };
-
       if (preV.x !== null) {
         if (this.pinchStartLen > 0) {
           evt.singleZoom = getLen(v) / this.pinchStartLen;
           evt.zoom = evt.singleZoom * this.lastZoom;
           this.tempZoom = evt.zoom;
           evt.type = 'pinch';
-
           this._option.pinch(evt);
         }
-
         evt.angle = getRotateAngle(v, preV);
         evt.type = 'rotate';
-
         this._option.rotate(evt);
       }
-
       preV.x = v.x;
       preV.y = v.y;
     } else {
@@ -160,68 +139,51 @@ MinaTouch.prototype = {
         evt.deltaX = 0;
         evt.deltaY = 0;
       }
-
       this._option.pressMove(evt);
     }
-
     this._option.touchMove(evt);
-
     this._cancelLongTap();
-
     this.x2 = currentX;
     this.y2 = currentY;
-
-    if (len > 1) {// evt.preventDefault();
+    if (len > 1) {
+      // evt.preventDefault();
     }
   },
   end: function end(evt) {
     if (!evt.changedTouches) return;
-
     this._cancelLongTap();
-
     var self = this;
     evt.direction = this._swipeDirection(this.x1, this.x2, this.y1, this.y2); //在结束钩子都加入方向判断，但触发swipe瞬时必须位移大于30
-
     if (evt.touches.length < 2) {
       this.lastZoom = this.tempZoom;
-
       this._option.multipointEnd(evt);
     }
-
-    this._option.touchEnd(evt); //swipe
-
-
+    this._option.touchEnd(evt);
+    //swipe
     if (this.x2 && Math.abs(this.x1 - this.x2) > 30 || this.y2 && Math.abs(this.y1 - this.y2) > 30) {
       // evt.direction = this._swipeDirection(this.x1, this.x2, this.y1, this.y2);
       this.swipeTimeout = setTimeout(function () {
         evt.type = 'swipe';
-
         self._option.swipe(evt);
       }, 0);
     } else {
       this.tapTimeout = setTimeout(function () {
         evt.type = 'tap';
-
-        self._option.tap(evt); // trigger double tap immediately
-
-
+        self._option.tap(evt);
+        // trigger double tap immediately
         if (self.isDoubleTap) {
           evt.type = 'doubleTap';
-
           self._option.doubleTap(evt);
-
           clearTimeout(self.singleTapTimeout);
           self.isDoubleTap = false;
         }
       }, 0);
-
       if (!self.isDoubleTap) {
         self.singleTapTimeout = setTimeout(function () {
           self._option.singleTap(evt);
         }, 250);
       }
     }
-
     this.preV.x = 0;
     this.preV.y = 0;
     this.scale = 1;
@@ -233,7 +195,6 @@ MinaTouch.prototype = {
     clearTimeout(this.tapTimeout);
     clearTimeout(this.longTapTimeout);
     clearTimeout(this.swipeTimeout);
-
     this._option.touchCancel(evt);
   },
   _cancelLongTap: function _cancelLongTap() {
@@ -268,15 +229,12 @@ MinaTouch.prototype = {
     return null;
   }
 };
-
 function getLen(v) {
   return Math.sqrt(v.x * v.x + v.y * v.y);
 }
-
 function dot(v1, v2) {
   return v1.x * v2.x + v1.y * v2.y;
 }
-
 function getAngle(v1, v2) {
   var mr = getLen(v1) * getLen(v2);
   if (mr === 0) return 0;
@@ -284,17 +242,13 @@ function getAngle(v1, v2) {
   if (r > 1) r = 1;
   return Math.acos(r);
 }
-
 function cross(v1, v2) {
   return v1.x * v2.y - v2.x * v1.y;
 }
-
 function getRotateAngle(v1, v2) {
   var angle = getAngle(v1, v2);
-
   if (cross(v1, v2) > 0) {
     angle *= -1;
   }
-
   return angle * 180 / Math.PI;
 }

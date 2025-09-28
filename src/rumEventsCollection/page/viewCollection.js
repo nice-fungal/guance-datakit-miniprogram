@@ -8,15 +8,12 @@ export function startViewCollection(lifeCycle, configuration) {
   });
   return rewritePage(configuration, lifeCycle);
 }
-
 function processViewUpdate(view) {
   var apdexLevel;
-
   if (view.fmp) {
     apdexLevel = parseInt(Number(view.fmp) / 1000);
     apdexLevel = apdexLevel > 9 ? 9 : apdexLevel;
   }
-
   var viewEvent = {
     _dd: {
       documentVersion: view.documentVersion

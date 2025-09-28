@@ -26,7 +26,6 @@ export function doStartErrorCollection(lifeCycle) {
     }
   };
 }
-
 function computeRawError(error, startTime, context) {
   var stackTrace = error instanceof Error ? computeStackTrace(error) : undefined;
   return extend({
@@ -35,11 +34,9 @@ function computeRawError(error, startTime, context) {
     context
   }, formatUnknownError(stackTrace, error, 'Provided'));
 }
-
 function processError(error) {
   var resource = error.resource;
   var tracingInfo;
-
   if (resource) {
     tracingInfo = computeRequestTracingInfo(resource);
     var urlObj = urlParse(error.resource.url).getParse();
@@ -53,7 +50,6 @@ function processError(error) {
       urlPathGroup: replaceNumberCharByPath(urlObj.Path)
     };
   }
-
   var rawRumEvent = extend2Lev({
     date: error.startTime,
     error: {
@@ -72,14 +68,11 @@ function processError(error) {
     startTime: error.startTime
   };
 }
-
 function computeRequestTracingInfo(request) {
   var hasBeenTraced = request.traceId && request.spanId;
-
   if (!hasBeenTraced) {
     return undefined;
   }
-
   return {
     _dd: {
       spanId: request.spanId,

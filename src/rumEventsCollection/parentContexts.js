@@ -39,7 +39,6 @@ export function startParentContexts(lifeCycle) {
         startTime: currentAction.startClocks
       });
     }
-
     currentAction = undefined;
   });
   lifeCycle.subscribe(LifeCycleEventType.AUTO_ACTION_DISCARDED, function () {
@@ -54,15 +53,12 @@ export function startParentContexts(lifeCycle) {
   var clearOldContextsInterval = setInterval(function () {
     clearOldContexts(previousViews, VIEW_CONTEXT_TIME_OUT_DELAY);
   }, CLEAR_OLD_CONTEXTS_INTERVAL);
-
   function clearOldContexts(previousContexts, timeOutDelay) {
     var oldTimeThreshold = now() - timeOutDelay;
-
     while (previousContexts.length > 0 && previousContexts[previousContexts.length - 1].startTime < oldTimeThreshold) {
       previousContexts.pop();
     }
   }
-
   function buildCurrentActionContext() {
     return {
       userAction: {
@@ -70,7 +66,6 @@ export function startParentContexts(lifeCycle) {
       }
     };
   }
-
   function buildCurrentViewContext() {
     return {
       page: {
@@ -80,22 +75,18 @@ export function startParentContexts(lifeCycle) {
       }
     };
   }
-
   function findContext(buildContext, previousContexts, currentContext, startTime) {
     if (startTime === undefined) {
       return currentContext ? buildContext() : undefined;
     }
-
     if (currentContext && startTime >= currentContext.startTime) {
       return buildContext();
     }
-
     var flag = undefined;
     each(previousContexts, function (previousContext) {
       if (startTime > previousContext.endTime) {
         return false;
       }
-
       if (startTime >= previousContext.startTime) {
         flag = previousContext.context;
         return false;
@@ -103,7 +94,6 @@ export function startParentContexts(lifeCycle) {
     });
     return flag;
   }
-
   var parentContexts = {
     findView: function findView(startTime) {
       return findContext(buildCurrentViewContext, previousViews, currentView, startTime);

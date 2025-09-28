@@ -17,7 +17,6 @@ export function startXhrProxy() {
       }
     };
   }
-
   return xhrProxySingleton;
 }
 export function resetXhrProxy() {
@@ -25,7 +24,6 @@ export function resetXhrProxy() {
     xhrProxySingleton = undefined;
     beforeSendCallbacks.splice(0, beforeSendCallbacks.length);
     onRequestCompleteCallbacks.splice(0, onRequestCompleteCallbacks.length);
-
     if (typeof sdk.request === 'function') {
       sdk.request = originalXhrRequest;
     } else if (typeof sdk.httpRequest === 'function') {
@@ -33,13 +31,10 @@ export function resetXhrProxy() {
     }
   }
 }
-
 function proxyXhr() {
   originalXhrRequest = sdk.request || sdk.httpRequest;
-
   var request = function request() {
     var _this = this;
-
     var dataflux_xhr = {
       method: arguments[0].method || 'GET',
       startTime: 0,
@@ -50,32 +45,24 @@ function proxyXhr() {
     };
     dataflux_xhr.startTime = now();
     var originalSuccess = arguments[0].success;
-
     arguments[0].success = function () {
       reportXhr(arguments[0]);
-
       if (originalSuccess) {
         originalSuccess.apply(_this, arguments);
       }
     };
-
     var originalFail = arguments[0].fail;
-
     arguments[0].fail = function () {
       reportXhr(arguments[0]);
-
       if (originalFail) {
         originalFail.apply(_this, arguments);
       }
     };
-
     var hasBeenReported = false;
-
     var reportXhr = function reportXhr(res) {
       if (hasBeenReported) {
         return;
       }
-
       hasBeenReported = true;
       dataflux_xhr.duration = now() - dataflux_xhr.startTime;
       dataflux_xhr.response = JSON.stringify(res.data);
@@ -86,13 +73,11 @@ function proxyXhr() {
         callback(dataflux_xhr);
       });
     };
-
     beforeSendCallbacks.forEach(function (callback) {
       callback(dataflux_xhr);
     });
     return originalXhrRequest.call(this, dataflux_xhr.option);
   };
-
   if (typeof sdk.request === 'function') {
     sdk.request = request;
   } else if (typeof sdk.httpRequest === 'function') {

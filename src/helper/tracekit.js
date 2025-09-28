@@ -1,17 +1,13 @@
 import { sdk } from '../core/sdk';
 var UNKNOWN_FUNCTION = '?';
-
 function has(object, key) {
   return Object.prototype.hasOwnProperty.call(object, key);
 }
-
 function isUndefined(what) {
   return typeof what === 'undefined';
 }
-
 export function wrap(func) {
   var _this = this;
-
   function wrapped() {
     try {
       return func.apply(_this, arguments);
@@ -20,7 +16,6 @@ export function wrap(func) {
       throw e;
     }
   }
-
   return wrapped;
 }
 /**
@@ -67,15 +62,14 @@ export function wrap(func) {
  * @memberof TraceKit
  * @namespace
  */
-
 export var report = function reportModuleWrapper() {
   var handlers = [];
+
   /**
    * Add a crash handler.
    * @param {Function} handler
    * @memberof report
    */
-
   function subscribe(handler) {
     installGlobalHandler();
     installGlobalUnhandledRejectionHandler();
@@ -84,13 +78,12 @@ export var report = function reportModuleWrapper() {
     installGlobalOnLazyLoadErrorHandler();
     handlers.push(handler);
   }
+
   /**
    * Remove a crash handler.
    * @param {Function} handler
    * @memberof report
    */
-
-
   function unsubscribe(handler) {
     for (var i = handlers.length - 1; i >= 0; i -= 1) {
       if (handlers[i] === handler) {
@@ -98,6 +91,7 @@ export var report = function reportModuleWrapper() {
       }
     }
   }
+
   /**
    * Dispatch stack information to all handlers.
    * @param {StackTrace} stack
@@ -106,11 +100,8 @@ export var report = function reportModuleWrapper() {
    * @memberof report
    * @throws An exception if an error occurs while calling an handler.
    */
-
-
   function notifyHandlers(stack, isWindowError, error) {
     var exception;
-
     for (var i in handlers) {
       if (has(handlers, i)) {
         try {
@@ -120,12 +111,10 @@ export var report = function reportModuleWrapper() {
         }
       }
     }
-
     if (exception) {
       throw exception;
     }
   }
-
   var onErrorHandlerInstalled;
   var onUnhandledRejectionHandlerInstalled;
   var onPageNotFoundHandlerInstalled;
@@ -141,38 +130,32 @@ export var report = function reportModuleWrapper() {
    * @param {Error=} errorObj The actual Error object.
    * @memberof report
    */
-
   function traceKitWindowOnError(err) {
     var error = typeof err === 'string' ? new Error(err) : err;
     var stack;
     var name = '';
     var msg = '';
     stack = computeStackTrace(error);
-
     if (error && error.message && {}.toString.call(error.message) === '[object String]') {
       var messages = error.message.split('\n');
-
       if (messages.length >= 3) {
         msg = messages[2];
         var groups = msg.match(ERROR_TYPES_RE);
-
         if (groups) {
           name = groups[1];
           msg = groups[2];
         }
       }
     }
-
     if (msg) {
       stack.message = msg;
     }
-
     if (name) {
       stack.name = name;
     }
-
     notifyHandlers(stack, true, error);
   }
+
   /**
    * Ensures all unhandled rejections are recorded.
    * @param {PromiseRejectionEvent} e event.
@@ -180,8 +163,6 @@ export var report = function reportModuleWrapper() {
    * @see https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onunhandledrejection
    * @see https://developer.mozilla.org/en-US/docs/Web/API/PromiseRejectionEvent
    */
-
-
   function traceKitWindowOnUnhandledRejection(_ref) {
     var {
       reason,
@@ -192,65 +173,53 @@ export var report = function reportModuleWrapper() {
     var name = '';
     var msg = '';
     stack = computeStackTrace(error);
-
     if (error && error.message && {}.toString.call(error.message) === '[object String]') {
       var messages = error.message.split('\n');
-
       if (messages.length >= 3) {
         msg = messages[2];
         var groups = msg.match(ERROR_TYPES_RE);
-
         if (groups) {
           name = groups[1];
           msg = groups[2];
         }
       }
     }
-
     if (msg) {
       stack.message = msg;
     }
-
     if (name) {
       stack.name = name;
     }
-
     notifyHandlers(stack, true, error);
   }
+
   /**
    * Install a global onerror handler
    * @memberof report
    */
-
-
   function installGlobalHandler() {
     if (onErrorHandlerInstalled || !sdk.onError) {
       return;
     }
-
     sdk.onError(traceKitWindowOnError);
     onErrorHandlerInstalled = true;
   }
+
   /**
    * Install a global onunhandledrejection handler
    * @memberof report
    */
-
-
   function installGlobalUnhandledRejectionHandler() {
     if (onUnhandledRejectionHandlerInstalled || !sdk.onUnhandledRejection) {
       return;
     }
-
     sdk.onUnhandledRejection && sdk.onUnhandledRejection(traceKitWindowOnUnhandledRejection);
     onUnhandledRejectionHandlerInstalled = true;
   }
-
   function installGlobalOnPageNotFoundHandler() {
     if (onPageNotFoundHandlerInstalled || !sdk.onPageNotFound) {
       return;
     }
-
     sdk.onPageNotFound(res => {
       var url = res.path.split('?')[0];
       notifyHandlers({
@@ -261,35 +230,28 @@ export var report = function reportModuleWrapper() {
     });
     onPageNotFoundHandlerInstalled = true;
   }
-
   function installGlobalOnMemoryWarningHandler() {
     if (onMemoryWarningHandlerInstalled || !sdk.onMemoryWarning) {
       return;
     }
-
-    sdk.onMemoryWarning((_ref2) => {
+    sdk.onMemoryWarning(_ref2 => {
       var {
         level = -1
       } = _ref2;
       var levelMessage = '没有获取到告警级别信息';
-
       switch (level) {
         case 5:
           levelMessage = 'TRIM_MEMORY_RUNNING_MODERATE';
           break;
-
         case 10:
           levelMessage = 'TRIM_MEMORY_RUNNING_LOW';
           break;
-
         case 15:
           levelMessage = 'TRIM_MEMORY_RUNNING_CRITICAL';
           break;
-
         default:
           return;
       }
-
       notifyHandlers({
         message: levelMessage,
         type: 'memorywarning',
@@ -298,12 +260,10 @@ export var report = function reportModuleWrapper() {
     });
     onMemoryWarningHandlerInstalled = true;
   }
-
   function installGlobalOnLazyLoadErrorHandler() {
     if (onLazyLoadErrorHandlerInstalled || !sdk.onLazyLoadError) {
       return;
     }
-
     sdk.onLazyLoadError(res => {
       var subpackage = res.subpackage || [];
       notifyHandlers({
@@ -320,15 +280,13 @@ export var report = function reportModuleWrapper() {
    * @memberof report
    * @throws An exception if an incompvare stack trace is detected (old IE browsers).
    */
-
-
   function doReport(ex) {}
-
   doReport.subscribe = subscribe;
   doReport.unsubscribe = unsubscribe;
   doReport.traceKitWindowOnError = traceKitWindowOnError;
   return doReport;
 }();
+
 /**
  * computeStackTrace: cross-browser stack traces in JavaScript
  *
@@ -392,9 +350,10 @@ export var report = function reportModuleWrapper() {
  * @memberof TraceKit
  * @namespace
  */
-
 export var computeStackTrace = function computeStackTraceWrapper() {
-  var debug = false; // Contents of Exception in various browsers.
+  var debug = false;
+
+  // Contents of Exception in various browsers.
   //
   // SAFARI:
   // ex.message = Can't find variable: qq
@@ -438,19 +397,19 @@ export var computeStackTrace = function computeStackTraceWrapper() {
    * @return {?StackTrace} Stack trace information.
    * @memberof computeStackTrace
    */
-
   function computeStackTraceFromStackProp(ex) {
     if (!ex.stack) {
       return;
-    } // tslint:disable-next-line max-line-length
+    }
 
+    // tslint:disable-next-line max-line-length
+    var chrome = /^\s*at (.*?) ?\(((?:file|https?|blob|chrome-extension|native|eval|webpack|<anonymous>|\/).*?)(?::(\d+))?(?::(\d+))?\)?\s*$/i;
+    // tslint:disable-next-line max-line-length
+    var gecko = /^\s*(.*?)(?:\((.*?)\))?(?:^|@)((?:file|https?|blob|chrome|webpack|resource|\[native).*?|[^@]*bundle)(?::(\d+))?(?::(\d+))?\s*$/i;
+    // tslint:disable-next-line max-line-length
+    var winjs = /^\s*at (?:((?:\[object object\])?.+) )?\(?((?:file|ms-appx|https?|webpack|blob):.*?):(\d+)(?::(\d+))?\)?\s*$/i;
 
-    var chrome = /^\s*at (.*?) ?\(((?:file|https?|blob|chrome-extension|native|eval|webpack|<anonymous>|\/).*?)(?::(\d+))?(?::(\d+))?\)?\s*$/i; // tslint:disable-next-line max-line-length
-
-    var gecko = /^\s*(.*?)(?:\((.*?)\))?(?:^|@)((?:file|https?|blob|chrome|webpack|resource|\[native).*?|[^@]*bundle)(?::(\d+))?(?::(\d+))?\s*$/i; // tslint:disable-next-line max-line-length
-
-    var winjs = /^\s*at (?:((?:\[object object\])?.+) )?\(?((?:file|ms-appx|https?|webpack|blob):.*?):(\d+)(?::(\d+))?\)?\s*$/i; // Used to additionally parse URL/line/column from eval frames
-
+    // Used to additionally parse URL/line/column from eval frames
     var isEval;
     var geckoEval = /(\S+) line (\d+)(?: > eval line \d+)* > eval/i;
     var chromeEval = /\((\S*)(?::(\d+))(?::(\d+))\)/;
@@ -459,22 +418,16 @@ export var computeStackTrace = function computeStackTraceWrapper() {
     var submatch;
     var parts;
     var element;
-
     for (var i = 0, j = lines.length; i < j; i += 1) {
       if (chrome.exec(lines[i])) {
         parts = chrome.exec(lines[i]);
         var isNative = parts[2] && parts[2].indexOf('native') === 0; // start of line
-
         isEval = parts[2] && parts[2].indexOf('eval') === 0; // start of line
-
         submatch = chromeEval.exec(parts[2]);
-
         if (isEval && submatch) {
           // throw out eval line/column and use top-most line/column number
           parts[2] = submatch[1]; // url
-
           parts[3] = submatch[2]; // line
-
           parts[4] = submatch[3]; // column
         }
 
@@ -498,7 +451,6 @@ export var computeStackTrace = function computeStackTraceWrapper() {
         parts = gecko.exec(lines[i]);
         isEval = parts[3] && parts[3].indexOf(' > eval') > -1;
         submatch = geckoEval.exec(parts[3]);
-
         if (isEval && submatch) {
           // throw out eval line/column and use top-most line number
           parts[3] = submatch[1];
@@ -511,7 +463,6 @@ export var computeStackTrace = function computeStackTraceWrapper() {
           // NOTE: this hack doesn't work if top-most frame is eval
           stack[0].column = ex.columnNumber + 1;
         }
-
         element = {
           args: parts[2] ? parts[2].split(',') : [],
           column: parts[5] ? +parts[5] : undefined,
@@ -522,24 +473,21 @@ export var computeStackTrace = function computeStackTraceWrapper() {
       } else {
         continue;
       }
-
       if (!element.func && element.line) {
         element.func = UNKNOWN_FUNCTION;
       }
-
       stack.push(element);
     }
-
     if (!stack.length) {
       return;
     }
-
     return {
       stack,
       message: extractMessage(ex),
       name: ex.name
     };
   }
+
   /**
    * Computes stack trace information from the stacktrace property.
    * Opera 10+ uses this property.
@@ -547,28 +495,22 @@ export var computeStackTrace = function computeStackTraceWrapper() {
    * @return {?StackTrace} Stack trace information.
    * @memberof computeStackTrace
    */
-
-
   function computeStackTraceFromStacktraceProp(ex) {
     // Access and store the stacktrace property before doing ANYTHING
     // else to it because Opera is not very good at providing it
     // reliably in other circumstances.
     var stacktrace = ex.stacktrace;
-
     if (!stacktrace) {
       return;
     }
-
-    var opera10Regex = / line (\d+).*script (?:in )?(\S+)(?:: in function (\S+))?$/i; // tslint:disable-next-line max-line-length
-
+    var opera10Regex = / line (\d+).*script (?:in )?(\S+)(?:: in function (\S+))?$/i;
+    // tslint:disable-next-line max-line-length
     var opera11Regex = / line (\d+), column (\d+)\s*(?:in (?:<anonymous function: ([^>]+)>|([^\)]+))\((.*)\))? in (.*):\s*$/i;
     var lines = stacktrace.split('\n');
     var stack = [];
     var parts;
-
     for (var line = 0; line < lines.length; line += 2) {
       var element;
-
       if (opera10Regex.exec(lines[line])) {
         parts = opera10Regex.exec(lines[line]);
         element = {
@@ -588,27 +530,24 @@ export var computeStackTrace = function computeStackTraceWrapper() {
           url: parts[6]
         };
       }
-
       if (element) {
         if (!element.func && element.line) {
           element.func = UNKNOWN_FUNCTION;
         }
-
         element.context = [lines[line + 1]];
         stack.push(element);
       }
     }
-
     if (!stack.length) {
       return;
     }
-
     return {
       stack,
       message: extractMessage(ex),
       name: ex.name
     };
   }
+
   /**
    * NOT TESTED.
    * Computes stack trace information from an error message that includes
@@ -619,8 +558,6 @@ export var computeStackTrace = function computeStackTraceWrapper() {
    * @return {?StackTrace} Stack information.
    * @memberof computeStackTrace
    */
-
-
   function computeStackTraceFromOperaMultiLineMessage(ex) {
     // TODO: Clean this function up
     // Opera includes a stack trace into the exception message. An example is:
@@ -639,12 +576,11 @@ export var computeStackTrace = function computeStackTraceWrapper() {
     //   Line 1 of function script
     //     try { xxx('hi'); return false; } catch(ex) { report(ex); }
     //   ...
-    var lines = ex.message.split('\n');
 
+    var lines = ex.message.split('\n');
     if (lines.length < 4) {
       return;
     }
-
     var lineRE1 = /^\s*Line (\d+) of linked script ((?:file|https?|blob)\S+)(?:: in function (\S+))?\s*$/i;
     var lineRE2 = /^\s*Line (\d+) of inline#(\d+) script in ((?:file|https?|blob)\S+)(?:: in function (\S+))?\s*$/i;
     var lineRE3 = /^\s*Line (\d+) of function script\s*$/i;
@@ -652,16 +588,13 @@ export var computeStackTrace = function computeStackTraceWrapper() {
     var scripts = window && window.document && window.document.getElementsByTagName('script');
     var inlineScriptBlocks = [];
     var parts;
-
     for (var s in scripts) {
       if (has(scripts, s) && !scripts[s].src) {
         inlineScriptBlocks.push(scripts[s]);
       }
     }
-
     for (var line = 2; line < lines.length; line += 2) {
       var item;
-
       if (lineRE1.exec(lines[line])) {
         parts = lineRE1.exec(lines[line]);
         item = {
@@ -692,17 +625,14 @@ export var computeStackTrace = function computeStackTraceWrapper() {
           line: +parts[1]
         };
       }
-
       if (item) {
         if (!item.func) {
           item.func = UNKNOWN_FUNCTION;
         }
-
         item.context = [lines[line + 1]];
         stack.push(item);
       }
     }
-
     if (!stack.length) {
       return; // could not parse multiline exception message as Opera stack trace
     }
@@ -713,6 +643,7 @@ export var computeStackTrace = function computeStackTraceWrapper() {
       name: ex.name
     };
   }
+
   /**
    * Adds information about the first frame to incompvare stack traces.
    * Safari and IE require this to get compvare data on the first frame.
@@ -727,18 +658,14 @@ export var computeStackTrace = function computeStackTraceWrapper() {
    * augmented.
    * @memberof computeStackTrace
    */
-
-
   function augmentStackTraceWithInitialElement(stackInfo, url, lineNo, message) {
     var initial = {
       url,
       line: lineNo ? +lineNo : undefined
     };
-
     if (initial.url && initial.line) {
       stackInfo.incompvare = false;
       var stack = stackInfo.stack;
-
       if (stack.length > 0) {
         if (stack[0].url === initial.url) {
           if (stack[0].line === initial.line) {
@@ -752,15 +679,14 @@ export var computeStackTrace = function computeStackTraceWrapper() {
           }
         }
       }
-
       stack.unshift(initial);
       stackInfo.partial = true;
       return true;
     }
-
     stackInfo.incompvare = true;
     return false;
   }
+
   /**
    * Computes stack trace information by walking the arguments.caller
    * chain at the time the exception occurred. This will cause earlier
@@ -772,8 +698,6 @@ export var computeStackTrace = function computeStackTraceWrapper() {
    * @return {StackTrace} Stack trace information.
    * @memberof computeStackTrace
    */
-
-
   function computeStackTraceByWalkingCallerChain(ex, depth) {
     var functionName = /function\s+([_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*)?\s*\(/i;
     var stack = [];
@@ -781,12 +705,10 @@ export var computeStackTrace = function computeStackTraceWrapper() {
     var recursion = false;
     var parts;
     var item;
-
     for (var curr = computeStackTraceByWalkingCallerChain.caller; curr && !recursion; curr = curr.caller) {
       if (curr === computeStackTrace || curr === report) {
         continue;
       }
-
       item = {
         args: [],
         column: undefined,
@@ -795,30 +717,24 @@ export var computeStackTrace = function computeStackTraceWrapper() {
         url: undefined
       };
       parts = functionName.exec(curr.toString());
-
       if (curr.name) {
         item.func = curr.name;
       } else if (parts) {
         item.func = parts[1];
       }
-
       if (typeof item.func === 'undefined') {
         item.func = parts ? parts.input.substring(0, parts.input.indexOf('{')) : undefined;
       }
-
       if (funcs[curr + '']) {
         recursion = true;
       } else {
         funcs[curr + ''] = true;
       }
-
       stack.push(item);
     }
-
     if (depth) {
       stack.splice(0, depth);
     }
-
     var result = {
       stack,
       message: ex.message,
@@ -827,24 +743,21 @@ export var computeStackTrace = function computeStackTraceWrapper() {
     augmentStackTraceWithInitialElement(result, ex.sourceURL || ex.fileName, ex.line || ex.lineNumber, ex.message || ex.description);
     return result;
   }
+
   /**
    * Computes a stack trace for an exception.
    * @param {Error} ex
    * @param {(string|number)=} depth
    * @memberof computeStackTrace
    */
-
-
   function doComputeStackTrace(ex, depth) {
     var stack;
     var normalizedDepth = depth === undefined ? 0 : +depth;
-
     try {
       // This must be tried first because Opera 10 *destroys*
       // its stacktrace property if you try to access the stack
       // property first!!
       stack = computeStackTraceFromStacktraceProp(ex);
-
       if (stack) {
         return stack;
       }
@@ -853,10 +766,8 @@ export var computeStackTrace = function computeStackTraceWrapper() {
         throw e;
       }
     }
-
     try {
       stack = computeStackTraceFromStackProp(ex);
-
       if (stack) {
         return stack;
       }
@@ -865,10 +776,8 @@ export var computeStackTrace = function computeStackTraceWrapper() {
         throw e;
       }
     }
-
     try {
       stack = computeStackTraceFromOperaMultiLineMessage(ex);
-
       if (stack) {
         return stack;
       }
@@ -877,10 +786,8 @@ export var computeStackTrace = function computeStackTraceWrapper() {
         throw e;
       }
     }
-
     try {
       stack = computeStackTraceByWalkingCallerChain(ex, normalizedDepth + 1);
-
       if (stack) {
         return stack;
       }
@@ -889,48 +796,41 @@ export var computeStackTrace = function computeStackTraceWrapper() {
         throw e;
       }
     }
-
     return {
       message: extractMessage(ex),
       name: ex.name,
       stack: []
     };
   }
+
   /**
    * Logs a stacktrace starting from the previous call and working down.
    * @param {(number|string)=} depth How many frames deep to trace.
    * @return {StackTrace} Stack trace information.
    * @memberof computeStackTrace
    */
-
-
   function computeStackTraceOfCaller(depth) {
     var currentDepth = (depth === undefined ? 0 : +depth) + 1; // "+ 1" because "ofCaller" should drop one frame
-
     try {
       throw new Error();
     } catch (ex) {
       return computeStackTrace(ex, currentDepth + 1);
     }
   }
-
   doComputeStackTrace.augmentStackTraceWithInitialElement = augmentStackTraceWithInitialElement;
   doComputeStackTrace.computeStackTraceFromStackProp = computeStackTraceFromStackProp;
   doComputeStackTrace.ofCaller = computeStackTraceOfCaller;
   return doComputeStackTrace;
 }();
 var ERROR_TYPES_RE = /^(?:[Uu]ncaught (?:exception: )?)?(?:((?:Eval|Internal|Range|Reference|Syntax|Type|URI|)Error): )?(.*)$/;
-
 function extractMessage(ex) {
-  var message = ex && ex.message; // console.log('message',message)
-
+  var message = ex && ex.message;
+  // console.log('message',message)
   if (!message) {
     return 'No error message';
   }
-
   if (message.error && typeof message.error.message === 'string') {
     return message.error.message;
   }
-
   return message;
 }

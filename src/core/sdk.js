@@ -1,9 +1,7 @@
 import { deepMixObject } from '../helper/utils';
-
 function getSDK() {
   var sdk = null,
-      tracker = '';
-
+    tracker = '';
   try {
     if (typeof wx === 'object' && typeof wx.request === 'function') {
       sdk = deepMixObject({}, wx);
@@ -40,13 +38,11 @@ function getSDK() {
   } catch (err) {
     console.warn('unsupport platform, Fail to start');
   }
-
   return {
     sdk,
     tracker
   };
 }
-
 var instance = getSDK();
 export var sdk = instance.sdk;
 export var tracker = instance.tracker;

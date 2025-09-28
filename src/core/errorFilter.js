@@ -10,17 +10,13 @@ export function createErrorFilter(configuration, onLimitReached) {
           errorCount = 0;
         }, ONE_MINUTE);
       }
-
       errorCount += 1;
-
       if (errorCount <= configuration.maxErrorsByMinute || allowNextError) {
         allowNextError = false;
         return false;
       }
-
       if (errorCount === configuration.maxErrorsByMinute + 1) {
         allowNextError = true;
-
         try {
           onLimitReached({
             message: "Reached max number of errors by minute: ".concat(configuration.maxErrorsByMinute),
@@ -31,7 +27,6 @@ export function createErrorFilter(configuration, onLimitReached) {
           allowNextError = false;
         }
       }
-
       return true;
     }
   };

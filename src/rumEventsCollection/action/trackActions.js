@@ -5,13 +5,13 @@ import { trackEventCounts } from '../trackEventCounts';
 import { waitIdlePageActivity } from '../trackPageActiveites';
 import { ActionType } from '../../helper/enums';
 export function trackActions(lifeCycle) {
-  var action = startActionManagement(lifeCycle); // New views trigger the discard of the current pending Action
+  var action = startActionManagement(lifeCycle);
 
+  // New views trigger the discard of the current pending Action
   lifeCycle.subscribe(LifeCycleEventType.VIEW_CREATED, function () {
     action.discardCurrent();
   });
   var originPage = Page;
-
   Page = function Page(page) {
     var methods = getMethods(page);
     methods.forEach(methodName => {
@@ -21,9 +21,7 @@ export function trackActions(lifeCycle) {
     });
     return originPage(page);
   };
-
   var originComponent = Component;
-
   Component = function Component(component) {
     var methods = getMethods(component.methods);
     methods.forEach(methodName => {
@@ -33,26 +31,23 @@ export function trackActions(lifeCycle) {
     });
     return originComponent(component);
   };
-
   return {
     stop: function stop() {
-      action.discardCurrent(); // stopListener()
+      action.discardCurrent();
+      // stopListener()
     }
   };
 }
 
 function clickProxy(page, methodName, callback, lifeCycle) {
   var oirginMethod = page[methodName];
-
   page[methodName] = function () {
     var result = oirginMethod.apply(this, arguments);
     var action = {};
-
     if (isObject(arguments[0])) {
       var currentTarget = arguments[0].currentTarget || {};
       var dataset = currentTarget.dataset || {};
       var actionType = arguments[0].type;
-
       if (actionType && ActionType[actionType]) {
         action.type = actionType;
         action.name = dataset.name || dataset.content || dataset.type;
@@ -81,11 +76,9 @@ function clickProxy(page, methodName, callback, lifeCycle) {
         lifeCycle.notify(LifeCycleEventType.PAGE_ALIAS_ACTION, true);
       }
     }
-
     return result;
   };
 }
-
 function startActionManagement(lifeCycle) {
   var currentAction;
   var currentIdlePageActivitySubscription;
@@ -95,7 +88,6 @@ function startActionManagement(lifeCycle) {
         // Ignore any new action if another one is already occurring.
         return;
       }
-
       var pendingAutoAction = new PendingAutoAction(lifeCycle, type, name);
       currentAction = pendingAutoAction;
       currentIdlePageActivitySubscription = waitIdlePageActivity(lifeCycle, function (params) {
@@ -104,7 +96,6 @@ function startActionManagement(lifeCycle) {
         } else {
           pendingAutoAction.discard();
         }
-
         currentAction = undefined;
       });
     },
@@ -117,7 +108,6 @@ function startActionManagement(lifeCycle) {
     }
   };
 }
-
 var PendingAutoAction = function PendingAutoAction(lifeCycle, type, name) {
   this.id = UUID();
   this.startClocks = now();
@@ -130,7 +120,6 @@ var PendingAutoAction = function PendingAutoAction(lifeCycle, type, name) {
     startClocks: this.startClocks
   });
 };
-
 PendingAutoAction.prototype = {
   complete: function complete(endTime) {
     var eventCounts = this.eventCountsSubscription.eventCounts;

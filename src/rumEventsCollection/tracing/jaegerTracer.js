@@ -2,30 +2,26 @@
 function randomTraceId() {
   var digits = '0123456789abcdef';
   var n = '';
-
   for (var i = 0; i < 16; i += 1) {
     var rand = Math.floor(Math.random() * 16);
     n += digits[rand];
   }
-
   return n;
 }
+
 /**
  * 
  * @param {*} configuration  配置信息
  */
-
-
 export function JaegerTracer(configuration) {
-  var rootSpanId = randomTraceId(); // this._traceId = randomTraceId() + rootSpanId // 默认用128bit,兼容其他配置
-
+  var rootSpanId = randomTraceId();
+  // this._traceId = randomTraceId() + rootSpanId // 默认用128bit,兼容其他配置
   if (configuration.traceId128Bit) {
     // 128bit生成traceid
     this._traceId = randomTraceId() + rootSpanId;
   } else {
     this._traceId = rootSpanId;
   }
-
   this._spanId = rootSpanId;
 }
 JaegerTracer.prototype = {

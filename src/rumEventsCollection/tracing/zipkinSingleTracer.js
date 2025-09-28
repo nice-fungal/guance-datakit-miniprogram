@@ -2,20 +2,17 @@
 function randomTraceId() {
   var digits = '0123456789abcdef';
   var n = '';
-
   for (var i = 0; i < 16; i += 1) {
     var rand = Math.floor(Math.random() * 16);
     n += digits[rand];
   }
-
   return n;
 }
+
 /**
  * 
  * @param {*} configuration  配置信息
  */
-
-
 export function ZipkinSingleTracer(configuration) {
   var rootSpanId = randomTraceId();
   this._traceId = randomTraceId() + rootSpanId;

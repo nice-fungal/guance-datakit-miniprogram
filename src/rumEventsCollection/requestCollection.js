@@ -10,7 +10,6 @@ export function startRequestCollection(lifeCycle, configuration) {
   trackXhr(lifeCycle, configuration, tracer);
   trackDownload(lifeCycle, configuration);
 }
-
 function parseHeader(header) {
   // 大小写兼容
   if (!isObject(header)) return header;
@@ -20,7 +19,6 @@ function parseHeader(header) {
   });
   return res;
 }
-
 function getHeaderString(header) {
   if (!isObject(header)) return header;
   var headerStr = '';
@@ -29,7 +27,6 @@ function getHeaderString(header) {
   });
   return headerStr;
 }
-
 export function trackXhr(lifeCycle, configuration, tracer) {
   var xhrProxy = startXhrProxy();
   xhrProxy.beforeSend(function (context) {
@@ -88,7 +85,6 @@ export function trackDownload(lifeCycle, configuration) {
   });
   return dwonloadProxy;
 }
-
 function getNextRequestIndex() {
   var result = nextRequestIndex;
   nextRequestIndex += 1;

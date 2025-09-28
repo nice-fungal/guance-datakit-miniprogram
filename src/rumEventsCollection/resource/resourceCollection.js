@@ -8,7 +8,6 @@ export function startResourceCollection(lifeCycle, configuration) {
     lifeCycle.notify(LifeCycleEventType.RAW_RUM_EVENT_COLLECTED, processRequest(request));
   });
 }
-
 function processRequest(request) {
   var type = request.type;
   var timing = request.performance;
@@ -37,14 +36,11 @@ function processRequest(request) {
     rawRumEvent: resourceEvent
   };
 }
-
 function computeRequestTracingInfo(request) {
   var hasBeenTraced = request.traceId && request.spanId;
-
   if (!hasBeenTraced) {
     return undefined;
   }
-
   return {
     _dd: {
       spanId: request.spanId,
@@ -55,7 +51,6 @@ function computeRequestTracingInfo(request) {
     }
   };
 }
-
 function computePerformanceEntryMetrics(timing) {
   return {
     resource: extend2Lev({}, {

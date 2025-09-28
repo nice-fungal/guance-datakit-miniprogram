@@ -8,7 +8,6 @@ export function startAppCollection(lifeCycle, configuration) {
   });
   return rewriteApp(configuration, lifeCycle);
 }
-
 function processAppUpdate(appinfo) {
   var appEvent = {
     date: appinfo.startTime,

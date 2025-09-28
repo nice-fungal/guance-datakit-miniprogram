@@ -15,7 +15,6 @@ export function formatUnknownError(stackTrace, errorObject, nonErrorPrefix) {
       type: stackTrace && stackTrace.name
     };
   }
-
   return {
     message: stackTrace.message || 'Empty message',
     stack: toStackTraceString(stackTrace),
@@ -24,7 +23,6 @@ export function formatUnknownError(stackTrace, errorObject, nonErrorPrefix) {
 }
 export function toStackTraceString(stack) {
   var result = stack.name || 'Error' + ': ' + stack.message;
-
   if (isArray(stack.stack)) {
     stack.stack.forEach(function (frame) {
       var func = frame.func === '?' ? '<anonymous>' : frame.func;
@@ -34,6 +32,5 @@ export function toStackTraceString(stack) {
       result += '\n  at ' + func + args + ' @ ' + frame.url + line + column;
     });
   }
-
   return result;
 }

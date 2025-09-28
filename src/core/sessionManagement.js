@@ -8,13 +8,10 @@ export class sessionManagement {
     this.sessionId = UUID();
     this.isTrack = performDraw(configuration.sampleRate);
   }
-
   getSessionId() {
     return this.sessionId;
   }
-
   isTracked() {
     return this.isTrack;
   }
-
 }

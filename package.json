@@ -1,12 +1,13 @@
 {
     "name": "@cloudcare/rum-miniapp",
-    "version": "2.1.13",
+    "version": "2.1.15",
     "main": "cjs/index.js",
     "module": "esm/index.js",
     "miniprogram": "cjs",
     "types": "cjs/index.d.ts",
     "devDependencies": {
-        "@babel/core": "^7.12.10",
+        "@babel/cli": "^7.23.0",
+        "@babel/core": "^7.23.3",
         "@babel/preset-env": "^7.12.10",
         "ali-oss": "^6.12.0",
         "npm-run-all": "^4.1.5",
@@ -40,5 +41,7 @@
     "author": "dataflux",
     "license": "MIT",
     "description": "DataFlux RUM 小程序 端数据指标监控",
-    "dependencies": {}
+    "engines": {
+        "node": "15.6.0"
+    }
 }

@@ -6,11 +6,9 @@ export function startActionCollection(lifeCycle, configuration) {
   lifeCycle.subscribe(LifeCycleEventType.AUTO_ACTION_COMPLETED, function (action) {
     lifeCycle.notify(LifeCycleEventType.RAW_RUM_EVENT_COLLECTED, processAction(action));
   });
-
   if (configuration.trackInteractions) {
     trackActions(lifeCycle);
   }
-
   return {
     addAction: function addAction(action, savedCommonContext) {
       lifeCycle.notify(LifeCycleEventType.RAW_RUM_EVENT_COLLECTED, extend2Lev({
@@ -19,7 +17,6 @@ export function startActionCollection(lifeCycle, configuration) {
     }
   };
 }
-
 function processAction(action) {
   var autoActionProperties = isAutoAction(action) ? {
     action: {
@@ -57,7 +54,6 @@ function processAction(action) {
     startTime: action.startClocks
   };
 }
-
 function isAutoAction(action) {
   return action.type !== ActionType.custom;
 }

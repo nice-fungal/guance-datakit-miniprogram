@@ -16,21 +16,17 @@ export function startRumBatch(configuration, lifeCycle) {
     }
   };
 }
-
 function makeRumBatch(configuration, lifeCycle) {
   var primaryBatch = createRumBatch(configuration.datakitUrl, lifeCycle);
-
   function createRumBatch(endpointUrl, lifeCycle) {
     return new Batch(new HttpRequest(endpointUrl, configuration.batchBytesLimit), configuration.maxBatchSize, configuration.batchBytesLimit, configuration.maxMessageSize, configuration.flushTimeout, lifeCycle);
   }
-
   var stopped = false;
   return {
     add: function add(message) {
       if (stopped) {
         return;
       }
-
       primaryBatch.add(message);
     },
     stop: function stop() {
@@ -40,7 +36,6 @@ function makeRumBatch(configuration, lifeCycle) {
       if (stopped) {
         return;
       }
-
       primaryBatch.upsert(message, key);
     }
   };

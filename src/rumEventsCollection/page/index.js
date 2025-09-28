@@ -1,18 +1,16 @@
 import { extend, now, throttle, UUID, isNumber, getActivePage } from '../../helper/utils';
 import { trackEventCounts } from '../trackEventCounts';
-import { LifeCycleEventType } from '../../core/lifeCycle'; // 劫持原小程序App方法
-
+import { LifeCycleEventType } from '../../core/lifeCycle';
+// 劫持原小程序App方法
 export var THROTTLE_VIEW_UPDATE_PERIOD = 3000;
 export function rewritePage(configuration, lifeCycle) {
   var originPage = Page;
-
   Page = function Page(page) {
     // 合并方法，插入记录脚本
     var currentView,
-        startTime = now();
+      startTime = now();
     ['onReady', 'onShow', 'onLoad', 'onUnload', 'onHide'].forEach(methodName => {
       var userDefinedMethod = page[methodName];
-
       page[methodName] = function () {
         if (methodName === 'onShow' || methodName === 'onLoad') {
           if (typeof currentView === 'undefined') {
@@ -20,30 +18,24 @@ export function rewritePage(configuration, lifeCycle) {
             currentView = newView(lifeCycle, activePage && activePage.route, startTime);
           }
         }
-
         currentView && currentView.setLoadEventEnd(methodName);
-
         if ((methodName === 'onUnload' || methodName === 'onHide' || methodName === 'onShow') && currentView) {
           currentView.triggerUpdate();
-
           if (methodName === 'onUnload' || methodName === 'onHide') {
             currentView.end();
             currentView = undefined;
           }
         }
-
         return userDefinedMethod && userDefinedMethod.apply(this, arguments);
       };
     });
     return originPage(page);
   };
 }
-
 function newView(lifeCycle, route, startTime) {
   if (typeof startTime === 'undefined') {
     startTime = now();
   }
-
   var id = UUID();
   var isActive = true;
   var eventCounts = {
@@ -71,21 +63,16 @@ function newView(lifeCycle, route, startTime) {
   });
   var scheduleViewUpdate = scheduleViewThrottled.throttled;
   var cancelScheduleViewUpdate = scheduleViewThrottled.cancel;
-
   var _trackEventCounts = trackEventCounts(lifeCycle, function (newEventCounts) {
     eventCounts = newEventCounts;
     scheduleViewUpdate();
   });
-
   var stopEventCountsTracking = _trackEventCounts.stop;
-
   var _trackFptTime = trackFptTime(lifeCycle, function (duration) {
     fpt = duration;
     scheduleViewUpdate();
   });
-
   var stopFptTracking = _trackFptTime.stop;
-
   var _trackSetDataTime = trackSetDataTime(lifeCycle, function (duration) {
     if (isNumber(duration)) {
       setdataDuration += duration;
@@ -93,24 +80,19 @@ function newView(lifeCycle, route, startTime) {
       scheduleViewUpdate();
     }
   });
-
   var stopSetDataTracking = _trackSetDataTime.stop;
-
   var _trackLoadingTime = trackLoadingTime(lifeCycle, function (duration) {
     if (isNumber(duration)) {
       loadingDuration = duration;
       scheduleViewUpdate();
     }
   });
-
   var stopLoadingTimeTracking = _trackLoadingTime.stop;
-
   var setLoadEventEnd = function setLoadEventEnd(type) {
     if (type === 'onLoad') {
       loadingTime = now();
     } else if (type === 'onShow') {
       showTime = now();
-
       if (typeof onload2onshowTime === 'undefined' && typeof loadingTime !== 'undefined') {
         onload2onshowTime = showTime - loadingTime;
       }
@@ -118,7 +100,6 @@ function newView(lifeCycle, route, startTime) {
       if (typeof onshow2onready === 'undefined' && typeof showTime !== 'undefined') {
         onshow2onready = now() - showTime;
       }
-
       if (typeof fmp === 'undefined') {
         fmp = now() - startTime; // 从开发者角度看，小程序首屏渲染完成的标志是首页 Page.onReady 事件触发。
       }
@@ -126,13 +107,10 @@ function newView(lifeCycle, route, startTime) {
       if (typeof showTime !== 'undefined') {
         stayTime = now() - showTime;
       }
-
       isActive = false;
     }
-
     triggerViewUpdate();
   };
-
   function triggerViewUpdate() {
     documentVersion += 1;
     lifeCycle.notify(LifeCycleEventType.VIEW_UPDATED, {
@@ -153,7 +131,6 @@ function newView(lifeCycle, route, startTime) {
       isActive: isActive
     });
   }
-
   return {
     scheduleUpdate: scheduleViewUpdate,
     setLoadEventEnd,
@@ -173,11 +150,9 @@ function newView(lifeCycle, route, startTime) {
     }
   };
 }
-
 function trackFptTime(lifeCycle, callback) {
   var subscribe = lifeCycle.subscribe(LifeCycleEventType.PERFORMANCE_ENTRY_COLLECTED, function (entitys) {
     var firstRenderEntity = entitys.find(entity => entity.entryType === 'render' && entity.name === 'firstRender');
-
     if (typeof firstRenderEntity !== 'undefined') {
       callback(firstRenderEntity.duration);
     }
@@ -186,11 +161,9 @@ function trackFptTime(lifeCycle, callback) {
     stop: subscribe.unsubscribe
   };
 }
-
 function trackLoadingTime(lifeCycle, callback) {
   var subscribe = lifeCycle.subscribe(LifeCycleEventType.PERFORMANCE_ENTRY_COLLECTED, function (entitys) {
     var navigationEnity = entitys.find(entity => entity.entryType === 'navigation');
-
     if (typeof navigationEnity !== 'undefined') {
       callback(navigationEnity.duration);
     }
@@ -199,7 +172,6 @@ function trackLoadingTime(lifeCycle, callback) {
     stop: subscribe.unsubscribe
   };
 }
-
 function trackSetDataTime(lifeCycle, callback) {
   var subscribe = lifeCycle.subscribe(LifeCycleEventType.PAGE_SET_DATA_UPDATE, function (data) {
     if (!data) return;
@@ -208,7 +180,8 @@ function trackSetDataTime(lifeCycle, callback) {
   return {
     stop: subscribe.unsubscribe
   };
-} // function getActivePage() {
+}
+// function getActivePage() {
 // 	const curPages = getCurrentPages()
 // 	if (curPages.length) {
 // 		return curPages[curPages.length - 1]

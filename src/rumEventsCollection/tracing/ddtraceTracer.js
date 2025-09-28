@@ -2,20 +2,16 @@
 function randomTraceId() {
   var digits = '0123456789abcdef';
   var n = '';
-
   for (var i = 0; i < 19; i += 1) {
     var rand = Math.floor(Math.random() * 10);
     n += digits[rand];
   }
-
   return n;
 }
 /**
  * 
  * @param {*} configuration  配置信息
  */
-
-
 export function DDtraceTracer(configuration) {
   this._spanId = randomTraceId();
   this._traceId = randomTraceId();

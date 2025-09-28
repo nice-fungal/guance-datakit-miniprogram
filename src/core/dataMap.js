@@ -1,5 +1,5 @@
-import { RumEventType } from '../helper/enums'; // 需要用双引号将字符串类型的field value括起来， 这里有数组标示[string, path]
-
+import { RumEventType } from '../helper/enums';
+// 需要用双引号将字符串类型的field value括起来， 这里有数组标示[string, path]
 export var commonTags = {
   sdk_name: '_dd.sdk_name',
   sdk_version: '_dd.sdk_version',
