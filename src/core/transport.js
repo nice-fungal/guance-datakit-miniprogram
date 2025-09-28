@@ -1,15 +1,15 @@
-import { findByPath, escapeRowData, isNumber, each, isString, values, extend, isObject, isEmptyObject, isArray, escapeRowField, escapeJsonValue, toServerDuration } from '../helper/utils';
-import { computeBytesCount } from '../helper/byteUtils';
-import { sdk } from '../core/sdk';
-import { LifeCycleEventType } from '../core/lifeCycle';
-import { commonTags, dataMap, commonFields } from './dataMap';
+import { findByPath, escapeRowData, isNumber, each, isString, values, extend, isObject, isEmptyObject, isArray, escapeRowField, escapeJsonValue, toServerDuration } from "../helper/utils";
+import { computeBytesCount } from "../helper/byteUtils";
+import { sdk } from "../core/sdk";
+import { LifeCycleEventType } from "../core/lifeCycle";
+import { commonTags, dataMap, commonFields } from "./dataMap";
 
 // https://en.wikipedia.org/wiki/UTF-8
 var HAS_MULTI_BYTES_CHARACTERS = /[^\u0000-\u007F]/;
-var CUSTOM_KEYS = 'custom_keys';
+var CUSTOM_KEYS = "custom_keys";
 function addBatchPrecision(url) {
   if (!url) return url;
-  return url + (url.indexOf('?') === -1 ? '?' : '&') + 'precision=ms';
+  return url + (url.indexOf("?") === -1 ? "?" : "&") + "precision=ms";
 }
 var httpRequest = function httpRequest(endpointUrl, bytesLimit) {
   this.endpointUrl = endpointUrl;
@@ -20,12 +20,15 @@ httpRequest.prototype = {
     var url = addBatchPrecision(this.endpointUrl);
     var request = sdk.request || sdk.httpRequest;
     request({
-      method: 'POST',
+      method: "POST",
       header: {
-        'content-type': 'text/plain;charset=UTF-8'
+        "content-type": "text/plain;charset=UTF-8",
+        "x-client-timestamp": new Date().getTime().toString()
       },
       headers: {
-        'content-type': 'text/plain;charset=UTF-8' // 兼容其他
+        "content-type": "text/plain;charset=UTF-8",
+        // 兼容其他
+        "x-client-timestamp": new Date().getTime().toString()
       },
       url,
       data
@@ -35,7 +38,7 @@ httpRequest.prototype = {
 export var HttpRequest = httpRequest;
 export var processedMessageByDataMap = function processedMessageByDataMap(message) {
   if (!message || !message.type) return {
-    rowStr: '',
+    rowStr: "",
     rowData: undefined
   };
   var rowData = {
@@ -43,24 +46,24 @@ export var processedMessageByDataMap = function processedMessageByDataMap(messag
     fields: {}
   };
   var hasFileds = false;
-  var rowStr = '';
+  var rowStr = "";
   each(dataMap, function (value, key) {
     if (value.type === message.type) {
       if (value.alias_key) {
-        rowStr += value.alias_key + ',';
+        rowStr += value.alias_key + ",";
       } else {
-        rowStr += key + ',';
+        rowStr += key + ",";
       }
       rowData.measurement = key;
       var tagsStr = [];
       var tags = extend({}, commonTags, value.tags);
-      var filterFileds = ['date', 'type', CUSTOM_KEYS]; // 已经在datamap中定义过的fields和tags
+      var filterFileds = ["date", "type", CUSTOM_KEYS]; // 已经在datamap中定义过的fields和tags
       each(tags, function (value_path, _key) {
         var _value = findByPath(message, value_path);
         filterFileds.push(_key);
         if (_value || isNumber(_value)) {
           rowData.tags[_key] = escapeJsonValue(_value);
-          tagsStr.push(escapeRowData(_key) + '=' + escapeRowData(_value));
+          tagsStr.push(escapeRowData(_key) + "=" + escapeRowData(_value));
         }
       });
       var fields = extend({}, commonFields, value.fields);
@@ -73,14 +76,14 @@ export var processedMessageByDataMap = function processedMessageByDataMap(messag
           filterFileds.push(_key);
           if (_valueData || isNumber(_valueData)) {
             rowData.fields[_key] = _valueData; // 这里不需要转译
-            fieldsStr.push(escapeRowData(_key) + '=' + escapeRowField(_valueData));
+            fieldsStr.push(escapeRowData(_key) + "=" + escapeRowField(_valueData));
           }
         } else if (isString(_value)) {
           var _valueData = findByPath(message, _value);
           filterFileds.push(_key);
           if (_valueData || isNumber(_valueData)) {
             rowData.fields[_key] = _valueData; // 这里不需要转译
-            fieldsStr.push(escapeRowData(_key) + '=' + escapeRowField(_valueData));
+            fieldsStr.push(escapeRowData(_key) + "=" + escapeRowField(_valueData));
           }
         }
       });
@@ -94,28 +97,28 @@ export var processedMessageByDataMap = function processedMessageByDataMap(messag
           if (_value || isNumber(_value)) {
             _tagKeys.push(_key);
             rowData.fields[_key] = _value; // 这里不需要转译
-            fieldsStr.push(escapeRowData(_key) + '=' + escapeRowField(_value));
+            fieldsStr.push(escapeRowData(_key) + "=" + escapeRowField(_value));
           }
         });
         if (_tagKeys.length) {
           rowData.fields[CUSTOM_KEYS] = escapeRowField(_tagKeys);
-          fieldsStr.push(escapeRowData(CUSTOM_KEYS) + '=' + escapeRowField(_tagKeys));
+          fieldsStr.push(escapeRowData(CUSTOM_KEYS) + "=" + escapeRowField(_tagKeys));
         }
       }
       if (tagsStr.length) {
-        rowStr += tagsStr.join(',');
+        rowStr += tagsStr.join(",");
       }
       if (fieldsStr.length) {
-        rowStr += ' ';
-        rowStr += fieldsStr.join(',');
+        rowStr += " ";
+        rowStr += fieldsStr.join(",");
         hasFileds = true;
       }
-      rowStr = rowStr + ' ' + message.date;
+      rowStr = rowStr + " " + message.date;
       rowData.time = toServerDuration(message.date); // 这里不需要转译
     }
   });
   return {
-    rowStr: hasFileds ? rowStr : '',
+    rowStr: hasFileds ? rowStr : "",
     rowData: hasFileds ? rowData : undefined
   };
 };
@@ -143,7 +146,7 @@ batch.prototype = {
   flush: function flush() {
     if (this.bufferMessageCount !== 0) {
       var messages = this.pushOnlyBuffer.concat(values(this.upsertBuffer));
-      this.request.send(messages.join('\n'), this.bufferBytesSize);
+      this.request.send(messages.join("\n"), this.bufferBytesSize);
       this.pushOnlyBuffer = [];
       this.upsertBuffer = {};
       this.bufferBytesSize = 0;
@@ -155,9 +158,9 @@ batch.prototype = {
   },
   addOrUpdate: function addOrUpdate(message, key) {
     var process = this.process(message);
-    if (!process.processedMessage || process.processedMessage === '') return;
+    if (!process.processedMessage || process.processedMessage === "") return;
     if (process.messageBytesSize >= this.maxMessageSize) {
-      console.warn('Discarded a message whose size was bigger than the maximum allowed size' + this.maxMessageSize + 'KB.');
+      console.warn("Discarded a message whose size was bigger than the maximum allowed size" + this.maxMessageSize + "KB.");
       return;
     }
     if (this.hasMessageFor(key)) {
