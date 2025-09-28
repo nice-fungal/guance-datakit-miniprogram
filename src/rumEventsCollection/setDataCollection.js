@@ -32,6 +32,10 @@ export function startSetDataColloction(lifeCycle) {
       originComponentAttached = component['attached'];
       component['attached'] = handlerOrigin;
     }
+    if (component.onLoad) {
+      originComponentAttached = component.onLoad;
+      component.onLoad = handlerOrigin;
+    }
     return originComponent(component);
   };
 }

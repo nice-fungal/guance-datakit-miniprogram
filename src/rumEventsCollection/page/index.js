@@ -1,17 +1,17 @@
-import { extend, now, throttle, UUID, isNumber, getActivePage } from '../../helper/utils';
+import { extend, now, throttle, UUID, isNumber, getActivePage, getMethods } from '../../helper/utils';
 import { trackEventCounts } from '../trackEventCounts';
 import { LifeCycleEventType } from '../../core/lifeCycle';
 // 劫持原小程序App方法
 export var THROTTLE_VIEW_UPDATE_PERIOD = 3000;
 export function rewritePage(configuration, lifeCycle) {
   var originPage = Page;
-  Page = function Page(page) {
-    // 合并方法，插入记录脚本
+  var originComponent = Component;
+  var hookPage = function hookPage(pageInstance) {
     var currentView,
       startTime = now();
     ['onReady', 'onShow', 'onLoad', 'onUnload', 'onHide'].forEach(methodName => {
-      var userDefinedMethod = page[methodName];
-      page[methodName] = function () {
+      var userDefinedMethod = pageInstance[methodName];
+      pageInstance[methodName] = function () {
         if (methodName === 'onShow' || methodName === 'onLoad') {
           if (typeof currentView === 'undefined') {
             var activePage = getActivePage();
@@ -29,6 +29,18 @@ export function rewritePage(configuration, lifeCycle) {
         return userDefinedMethod && userDefinedMethod.apply(this, arguments);
       };
     });
+  };
+  Component = function Component(component) {
+    try {
+      hookPage(component.methods);
+    } catch (error) {}
+    return originComponent(component);
+  };
+  Page = function Page(page) {
+    // 合并方法，插入记录脚本
+    try {
+      hookPage(page);
+    } catch (error) {}
     return originPage(page);
   };
 }

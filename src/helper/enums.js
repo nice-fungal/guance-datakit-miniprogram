@@ -34,7 +34,8 @@ export var MpHook = {
   onPageScroll: 1,
   onResize: 1,
   onHide: 1,
-  onUnload: 1
+  onUnload: 1,
+  onRouteDone: 1
 };
 export var TraceType = {
   DDTRACE: 'ddtrace',

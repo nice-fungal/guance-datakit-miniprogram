@@ -11,24 +11,26 @@ export function trackActions(lifeCycle) {
   lifeCycle.subscribe(LifeCycleEventType.VIEW_CREATED, function () {
     action.discardCurrent();
   });
-  var originPage = Page;
-  Page = function Page(page) {
-    var methods = getMethods(page);
+  var hookClick = function hookClick(instance) {
+    var methods = getMethods(instance);
     methods.forEach(methodName => {
-      clickProxy(page, methodName, function (_action) {
+      clickProxy(instance, methodName, function (_action) {
         action.create(_action.type, _action.name);
       }, lifeCycle);
     });
+  };
+  var originPage = Page;
+  Page = function Page(page) {
+    try {
+      hookClick(page);
+    } catch (error) {}
     return originPage(page);
   };
   var originComponent = Component;
   Component = function Component(component) {
-    var methods = getMethods(component.methods);
-    methods.forEach(methodName => {
-      clickProxy(component, methodName, function (_action) {
-        action.create(_action.type, _action.name);
-      });
-    });
+    try {
+      hookClick(component.methods);
+    } catch (error) {}
     return originComponent(component);
   };
   return {
@@ -42,6 +44,9 @@ export function trackActions(lifeCycle) {
 function clickProxy(page, methodName, callback, lifeCycle) {
   var oirginMethod = page[methodName];
   page[methodName] = function () {
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
     var result = oirginMethod.apply(this, arguments);
     var action = {};
     if (isObject(arguments[0])) {

@@ -219,9 +219,10 @@ export function elapsed(start, end) {
   return end - start;
 }
 export function getMethods(obj) {
+  var isExcludeMpHook = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
   var funcs = [];
   for (var key in obj) {
-    if (typeof obj[key] === 'function' && !MpHook[key]) {
+    if (typeof obj[key] === 'function' && (!isExcludeMpHook || !MpHook[key])) {
       funcs.push(key);
     }
   }
