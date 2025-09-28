@@ -8,26 +8,98 @@ class BaseInfo {
   }
   getDeviceInfo() {
     try {
-      var deviceInfo = sdk.getSystemInfoSync();
-      var osInfo = deviceInfo.system.split(' ');
-      var osVersion = osInfo.length > 1 && osInfo[1];
+      var deviceInfo = {};
+      if (sdk.getDeviceInfo) {
+        deviceInfo = sdk.getDeviceInfo();
+      } else {
+        var {
+          brand,
+          system,
+          model,
+          platform,
+          cpuType,
+          memorySize
+        } = sdk.getSystemInfoSync();
+        deviceInfo = {
+          brand,
+          system,
+          model,
+          platform,
+          cpuType,
+          memorySize
+        };
+      }
+      var appBaseInfo = {};
+      if (sdk.getAppBaseInfo) {
+        appBaseInfo = sdk.getAppBaseInfo();
+      } else {
+        var {
+          SDKVersion,
+          language,
+          version,
+          host
+        } = sdk.getSystemInfoSync();
+        appBaseInfo = {
+          SDKVersion,
+          language,
+          version,
+          host
+        };
+      }
+      var windowInfo = {};
+      if (sdk.getWindowInfo) {
+        windowInfo = sdk.getWindowInfo();
+      } else {
+        var {
+          pixelRatio,
+          screenWidth,
+          screenHeight,
+          windowWidth,
+          windowHeight,
+          statusBarHeight,
+          screenTop
+        } = sdk.getSystemInfoSync();
+        windowInfo = {
+          pixelRatio,
+          screenHeight,
+          screenWidth,
+          windowWidth,
+          windowHeight,
+          statusBarHeight,
+          screenTop
+        };
+      }
+      var osData = deviceInfo.system.split(' ');
+      var osVersion = osData.length > 1 && osData[1];
       var osVersionMajor = osVersion && osVersion.split('.').length && osVersion.split('.')[0];
+      var osInfo = {
+        os: osData.length > 0 && osData[0],
+        osVersion,
+        osVersionMajor
+      };
       var deviceUUid = '';
-      if (deviceInfo.host) {
-        deviceUUid = deviceInfo.host.appId;
+      if (appBaseInfo.host) {
+        deviceUUid = appBaseInfo.host.appId;
       }
       this.deviceInfo = {
-        screenSize: "".concat(deviceInfo.screenWidth, "*").concat(deviceInfo.screenHeight, " "),
         platform: deviceInfo.platform,
-        platformVersion: deviceInfo.version,
-        osVersion: osVersion,
-        osVersionMajor: osVersionMajor,
-        os: osInfo.length > 0 && osInfo[0],
         brand: deviceInfo.brand,
         model: deviceInfo.model,
-        frameworkVersion: deviceInfo.SDKVersion,
-        pixelRatio: deviceInfo.pixelRatio,
-        deviceUuid: deviceUUid
+        cpuType: deviceInfo.cpuType,
+        memorySize: deviceInfo.memorySize,
+        deviceUuid: deviceUUid,
+        osVersion: osInfo.osVersion,
+        osVersionMajor: osInfo.osVersionMajor,
+        os: osInfo.os,
+        platformVersion: appBaseInfo.version,
+        frameworkVersion: appBaseInfo.SDKVersion,
+        platformLanguage: appBaseInfo.language,
+        screenSize: "".concat(windowInfo.screenWidth, "*").concat(windowInfo.screenHeight, " "),
+        pixelRatio: windowInfo.pixelRatio,
+        windowHeight: windowInfo.windowHeight,
+        windowWidth: windowInfo.windowWidth,
+        statusBarHeight: windowInfo.statusBarHeight,
+        screenTop: windowInfo.screenTop
       };
     } catch (e) {
       console.error(e);
