@@ -86,7 +86,7 @@ export function trackPageActivities(lifeCycle) {
   };
 }
 export function waitPageActivitiesCompletion(pageActivitiesObservable, stopPageActivitiesTracking, completionCallback) {
-  var idleTimeoutId;
+  //   var idleTimeoutId
   var hasCompleted = false;
   var validationTimeoutId = setTimeout(function () {
     complete({
@@ -102,21 +102,22 @@ export function waitPageActivitiesCompletion(pageActivitiesObservable, stopPageA
   pageActivitiesObservable.subscribe(function (data) {
     var isBusy = data.isBusy;
     clearTimeout(validationTimeoutId);
-    clearTimeout(idleTimeoutId);
+    // clearTimeout(idleTimeoutId)
     var lastChangeTime = now();
     if (!isBusy) {
-      idleTimeoutId = setTimeout(function () {
-        complete({
-          hadActivity: true,
-          endTime: lastChangeTime
-        });
-      }, PAGE_ACTIVITY_END_DELAY);
+      //   idleTimeoutId = setTimeout(function () {
+      //     complete({ hadActivity: true, endTime: lastChangeTime })
+      //   }, PAGE_ACTIVITY_END_DELAY)
+      complete({
+        hadActivity: true,
+        endTime: lastChangeTime
+      });
     }
   });
   function stop() {
     hasCompleted = true;
     clearTimeout(validationTimeoutId);
-    clearTimeout(idleTimeoutId);
+    // clearTimeout(idleTimeoutId)
     clearTimeout(maxDurationTimeoutId);
     stopPageActivitiesTracking();
   }
