@@ -695,3 +695,16 @@ export function getGlobalObject() {
   }
   return globalObject;
 }
+export function assign(target) {
+  each(slice.call(arguments, 1), function (source) {
+    for (var prop in source) {
+      if (Object.prototype.hasOwnProperty.call(source, prop)) {
+        target[prop] = source[prop];
+      }
+    }
+  });
+  return target;
+}
+export function shallowClone(object) {
+  return assign({}, object);
+}

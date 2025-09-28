@@ -1,4 +1,4 @@
-import { each, extend, getOrigin } from '../../helper/utils';
+import { each, extend, getOrigin, getType, shallowClone } from '../../helper/utils';
 import { TraceType } from '../../helper/enums';
 import { DDtraceTracer } from './ddtraceTracer';
 import { SkyWalkingTracer } from './skywalkingTracer';
@@ -70,7 +70,18 @@ export function injectHeadersIfTracingAllowed(configuration, context, inject) {
   if (!tracer || !tracer.isTracingSupported()) {
     return;
   }
+  var headers = tracer.makeTracingHeaders();
   context.traceId = tracer.getTraceId();
   context.spanId = tracer.getSpanId();
-  inject(tracer.makeTracingHeaders());
+  if (configuration.injectTraceHeader) {
+    var result = configuration.injectTraceHeader(shallowClone(context));
+    if (getType(result) === 'object') {
+      each(result, function (value, key) {
+        if (getType(value) === 'string') {
+          headers[key] = value;
+        }
+      });
+    }
+  }
+  inject(headers);
 }

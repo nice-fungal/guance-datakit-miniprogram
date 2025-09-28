@@ -1,5 +1,6 @@
 import { extend2Lev, urlParse, values, isFunction, isBoolean } from '../helper/utils';
 import { ONE_KILO_BYTE, ONE_SECOND, TraceType } from '../helper/enums';
+import { catchUserErrors } from '../helper/caatchUserErrors';
 var TRIM_REGIX = /^\s+|\s+$/g;
 export var DEFAULT_CONFIGURATION = {
   sampleRate: 100,
@@ -55,7 +56,8 @@ export function commonInit(userConfiguration, buildEnv) {
     sdkName: buildEnv.sdkName,
     service: userConfiguration.service || 'miniapp',
     datakitUrl: getDatakitEndPoint(userConfiguration),
-    tags: userConfiguration.tags || []
+    tags: userConfiguration.tags || [],
+    injectTraceHeader: userConfiguration.injectTraceHeader && catchUserErrors(userConfiguration.injectTraceHeader, 'injectTraceHeader threw an error:')
   };
   if ('trackInteractions' in userConfiguration) {
     transportConfiguration.trackInteractions = !!userConfiguration.trackInteractions;
