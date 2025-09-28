@@ -1,1 +1,1 @@
-export { datafluxRum } from './boot/rum.entry'
+export { datafluxRum } from './boot/rum.entry';

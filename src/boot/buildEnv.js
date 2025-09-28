@@ -1,4 +1,4 @@
-export const buildEnv = {
-	sdkVersion: '<<< SDK_VERSION >>>',
-	sdkName: 'df_miniapp_rum_sdk',
-}
+export var buildEnv = {
+  sdkVersion: '2.1.0',
+  sdkName: 'df_miniapp_rum_sdk'
+};
