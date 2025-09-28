@@ -25,9 +25,22 @@ export function resetXhrProxy() {
     beforeSendCallbacks.splice(0, beforeSendCallbacks.length);
     onRequestCompleteCallbacks.splice(0, onRequestCompleteCallbacks.length);
     if (typeof sdk.request === 'function') {
-      sdk.request = originalXhrRequest;
+      // 使用 requestProxy 覆盖微信原生 request、uploadFile、downloadFile 接口
+      Object.defineProperties(sdk, {
+        // request
+        request: {
+          value: originalXhrRequest
+        }
+      });
     } else if (typeof sdk.httpRequest === 'function') {
-      sdk.httpRequest = originalXhrRequest;
+      // sdk.httpRequest = request
+      // 使用 requestProxy 覆盖微信原生 request、uploadFile、downloadFile 接口
+      Object.defineProperties(sdk, {
+        // request
+        httpRequest: {
+          value: originalXhrRequest
+        }
+      });
     }
   }
 }
@@ -79,8 +92,21 @@ function proxyXhr() {
     return originalXhrRequest.call(this, dataflux_xhr.option);
   };
   if (typeof sdk.request === 'function') {
-    sdk.request = request;
+    // 使用 requestProxy 覆盖微信原生 request、uploadFile、downloadFile 接口
+    Object.defineProperties(sdk, {
+      // request
+      request: {
+        value: request
+      }
+    });
   } else if (typeof sdk.httpRequest === 'function') {
-    sdk.httpRequest = request;
+    // sdk.httpRequest = request
+    // 使用 requestProxy 覆盖微信原生 request、uploadFile、downloadFile 接口
+    Object.defineProperties(sdk, {
+      // request
+      httpRequest: {
+        value: request
+      }
+    });
   }
 }

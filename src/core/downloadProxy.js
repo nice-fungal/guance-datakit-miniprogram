@@ -24,12 +24,17 @@ export function resetDownloadProxy() {
     downloadProxySingleton = undefined;
     beforeSendCallbacks.splice(0, beforeSendCallbacks.length);
     onRequestCompleteCallbacks.splice(0, onRequestCompleteCallbacks.length);
-    sdk.downloadFile = originalDownloadRequest;
+    Object.defineProperties(sdk, {
+      // request
+      downloadFile: {
+        value: originalDownloadRequest
+      }
+    });
   }
 }
 function proxyDownload() {
   originalDownloadRequest = sdk.downloadFile;
-  sdk.downloadFile = function () {
+  var downloadFile = function downloadFile() {
     var _this = this;
     var dataflux_xhr = {
       method: 'GET',
@@ -76,4 +81,12 @@ function proxyDownload() {
     });
     return originalDownloadRequest.apply(this, arguments);
   };
+  if (typeof sdk.downloadFile === 'function') {
+    Object.defineProperties(sdk, {
+      // request
+      downloadFile: {
+        value: downloadFile
+      }
+    });
+  }
 }

@@ -4,34 +4,34 @@ function getSDK() {
     tracker = '';
   try {
     if (typeof wx === 'object' && typeof wx.request === 'function') {
-      sdk = deepMixObject({}, wx);
+      sdk = wx;
       tracker = 'wx';
-      wx = sdk;
+      //   wx = sdk
     } else if (typeof my === 'object' && typeof my.request === 'function') {
       // tslint:disable-next-line: no-unsafe-any
-      sdk = deepMixObject({}, my);
+      sdk = my;
       tracker = 'my';
-      my = sdk;
+      //   my = sdk
     } else if (typeof tt === 'object' && typeof tt.request === 'function') {
       // tslint:disable-next-line: no-unsafe-any
-      sdk = deepMixObject({}, tt);
+      sdk = tt;
       tracker = 'tt';
-      tt = sdk;
+      //   tt = sdk
     } else if (typeof dd === 'object' && typeof dd.httpRequest === 'function') {
       // tslint:disable-next-line: no-unsafe-any
-      sdk = deepMixObject({}, dd);
+      sdk = dd;
       tracker = 'dd';
-      dd = sdk;
+      //   dd = sdk
     } else if (typeof qq === 'object' && typeof qq.request === 'function') {
       // tslint:disable-next-line: no-unsafe-any
-      sdk = deepMixObject({}, qq);
+      sdk = qq;
       tracker = 'qq';
-      qq = sdk;
+      //   qq = sdk
     } else if (typeof swan === 'object' && typeof swan.request === 'function') {
       // tslint:disable-next-line: no-unsafe-any
-      sdk = deepMixObject({}, swan);
+      sdk = swan;
       tracker = 'swan';
-      swan = sdk;
+      //   swan = sdk
     } else {
       throw new Error('guance miniapp 暂不支持此平台');
     }
