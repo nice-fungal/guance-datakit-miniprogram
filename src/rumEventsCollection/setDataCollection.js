@@ -16,20 +16,22 @@ export function startSetDataColloction(lifeCycle) {
   };
   Component = function Component(component) {
     var originComponentAttached;
-    if (component.lifetimes) {
-      originComponentAttached = component.lifetimes['attached'];
-    } else {
-      // 兼容老版本
-      originComponentAttached = component['attached'];
-    }
-    component['attached'] = function () {
+    function handlerOrigin() {
       this.setUpdatePerformanceListener && this.setUpdatePerformanceListener({
         withDataPaths: true
       }, res => {
         lifeCycle.notify(LifeCycleEventType.PAGE_SET_DATA_UPDATE, res);
       });
       return originComponentAttached && originComponentAttached.apply(this, arguments);
-    };
+    }
+    if (component.lifetimes && component.lifetimes['attached']) {
+      originComponentAttached = component.lifetimes['attached'];
+      component.lifetimes['attached'] = handlerOrigin;
+    } else if (component['attached']) {
+      // 兼容老版本
+      originComponentAttached = component['attached'];
+      component['attached'] = handlerOrigin;
+    }
     return originComponent(component);
   };
 }
