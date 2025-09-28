@@ -80,6 +80,8 @@ export var dataMap = {
   error: {
     type: RumEventType.ERROR,
     tags: {
+      trace_id: '_dd.trace_id',
+      span_id: '_dd.span_id',
       error_source: 'error.source',
       error_type: 'error.type',
       resource_url: 'error.resource.url',

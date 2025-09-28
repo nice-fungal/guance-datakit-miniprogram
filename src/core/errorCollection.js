@@ -105,7 +105,9 @@ export function trackNetworkError(configuration, errorObservable) {
         resource: {
           method: request.method,
           statusCode: request.status,
-          url: request.url
+          url: request.url,
+          traceId: request.traceId,
+          spanId: request.spanId
         },
         type: ErrorSource.NETWORK,
         source: ErrorSource.NETWORK,

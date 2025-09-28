@@ -1,7 +1,7 @@
 import { startAutomaticErrorCollection } from '../../core/errorCollection';
 import { RumEventType } from '../../helper/enums';
 import { LifeCycleEventType } from '../../core/lifeCycle';
-import { urlParse, replaceNumberCharByPath, getStatusGroup } from '../../helper/utils';
+import { urlParse, replaceNumberCharByPath, getStatusGroup, extend2Lev } from '../../helper/utils';
 export function startErrorCollection(lifeCycle, configuration) {
   // return doStartErrorCollection(
   // 	lifeCycle,
@@ -44,8 +44,10 @@ export function doStartErrorCollection(lifeCycle) {
 
 function processError(error) {
   var resource = error.resource;
+  var tracingInfo;
 
   if (resource) {
+    tracingInfo = computeRequestTracingInfo(resource);
     var urlObj = urlParse(error.resource.url).getParse();
     resource = {
       method: error.resource.method,
@@ -58,7 +60,7 @@ function processError(error) {
     };
   }
 
-  var rawRumEvent = {
+  var rawRumEvent = extend2Lev({
     date: error.startTime,
     error: {
       message: error.message,
@@ -69,9 +71,24 @@ function processError(error) {
       starttime: error.startTime
     },
     type: RumEventType.ERROR
-  };
+  }, tracingInfo);
   return {
     rawRumEvent: rawRumEvent,
     startTime: error.startTime
+  };
+}
+
+function computeRequestTracingInfo(request) {
+  var hasBeenTraced = request.traceId && request.spanId;
+
+  if (!hasBeenTraced) {
+    return undefined;
+  }
+
+  return {
+    _dd: {
+      spanId: request.spanId,
+      traceId: request.traceId
+    }
   };
 }
