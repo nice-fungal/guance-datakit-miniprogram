@@ -171,7 +171,6 @@ export function toValidEntry(entry) {
   //   redirectStart
   // }
 }
-
 function hasRedirection(entry) {
   // The only time fetchStart is different than startTime is if a redirection occurred.
   return entry.fetchStart !== entry.startTime;

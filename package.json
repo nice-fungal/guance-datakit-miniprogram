@@ -1,6 +1,6 @@
 {
     "name": "@cloudcare/rum-miniapp",
-    "version": "2.2.1",
+    "version": "2.2.2",
     "main": "cjs/index.js",
     "module": "esm/index.js",
     "miniprogram": "cjs",
@@ -40,8 +40,5 @@
     },
     "author": "dataflux",
     "license": "MIT",
-    "description": "DataFlux RUM 小程序 端数据指标监控",
-    "engines": {
-        "node": "15.6.0"
-    }
+    "description": "DataFlux RUM 小程序 端数据指标监控"
 }

@@ -430,7 +430,6 @@ export var computeStackTrace = function computeStackTraceWrapper() {
           parts[3] = submatch[2]; // line
           parts[4] = submatch[3]; // column
         }
-
         element = {
           args: isNative ? [parts[2]] : [],
           column: parts[4] ? +parts[4] : undefined,
@@ -636,7 +635,6 @@ export var computeStackTrace = function computeStackTraceWrapper() {
     if (!stack.length) {
       return; // could not parse multiline exception message as Opera stack trace
     }
-
     return {
       stack,
       message: lines[0],
@@ -671,7 +669,6 @@ export var computeStackTrace = function computeStackTraceWrapper() {
           if (stack[0].line === initial.line) {
             return false; // already in stack trace
           }
-
           if (!stack[0].line && stack[0].func === initial.func) {
             stack[0].line = initial.line;
             stack[0].context = initial.context;

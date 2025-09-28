@@ -82,7 +82,6 @@ export function startAutomaticErrorCollection(configuration) {
     startRuntimeErrorTracking(errorObservable);
     // filteredErrorsObservable = filterErrors(configuration, errorObservable)
   }
-
   return errorObservable;
 }
 export function trackNetworkError(configuration, errorObservable) {

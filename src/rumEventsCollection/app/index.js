@@ -12,7 +12,6 @@ export function rewriteApp(configuration, lifeCycle) {
   var appInfo = {
     isStartUp: false // 是否启动
   };
-
   var startTime;
   App = function App(app) {
     startTime = now()
@@ -83,7 +82,6 @@ function startPerformanceObservable(lifeCycle) {
       // 资源下载时间暂时定为：首次启动时间-脚本加载时间-初次渲染时间
     }
   });
-
   return {
     stop: subscribe.unsubscribe
   };

@@ -27,7 +27,6 @@ httpRequest.prototype = {
       headers: {
         'content-type': 'text/plain;charset=UTF-8' // 兼容其他
       },
-
       url,
       data
     });
@@ -115,7 +114,6 @@ export var processedMessageByDataMap = function processedMessageByDataMap(messag
       rowData.time = toServerDuration(message.date); // 这里不需要转译
     }
   });
-
   return {
     rowStr: hasFileds ? rowStr : '',
     rowData: hasFileds ? rowData : undefined

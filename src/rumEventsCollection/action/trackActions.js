@@ -40,7 +40,6 @@ export function trackActions(lifeCycle) {
     }
   };
 }
-
 function clickProxy(page, methodName, callback, lifeCycle) {
   var oirginMethod = page[methodName];
   page[methodName] = function () {

@@ -30,7 +30,6 @@ export var DEFAULT_CONFIGURATION = {
     return false;
   } // 自定义方法根据请求资源 url 判断是否需要采集对应资源数据，默认都采集。 返回：false 表示要采集，true 表示不需要采集
 };
-
 function trim(str) {
   return str.replace(TRIM_REGIX, '');
 }
