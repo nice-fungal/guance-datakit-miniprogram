@@ -1,8 +1,7 @@
-import { findByPath, escapeRowData, isNumber, each, isString, values, extend, isObject, isEmptyObject, isArray, isBoolean, toServerDuration } from '../helper/utils';
+import { findByPath, escapeRowData, isNumber, each, isString, values, extend, isObject, isEmptyObject, isArray, escapeRowField, escapeJsonValue, toServerDuration } from '../helper/utils';
 import { sdk } from '../core/sdk';
 import { LifeCycleEventType } from '../core/lifeCycle';
-import { commonTags, dataMap } from './dataMap';
-import { RumEventType } from '../helper/enums'; // https://en.wikipedia.org/wiki/UTF-8
+import { commonTags, dataMap } from './dataMap'; // https://en.wikipedia.org/wiki/UTF-8
 
 var HAS_MULTI_BYTES_CHARACTERS = /[^\u0000-\u007F]/;
 var CUSTOM_KEYS = 'custom_keys';
@@ -53,7 +52,7 @@ export var processedMessageByDataMap = function processedMessageByDataMap(messag
       rowData.measurement = key;
       var tagsStr = [];
       var tags = extend({}, commonTags, value.tags);
-      var filterFileds = ['date', 'type']; // 已经在datamap中定义过的fields和tags
+      var filterFileds = ['date', 'type', CUSTOM_KEYS]; // 已经在datamap中定义过的fields和tags
 
       each(tags, function (value_path, _key) {
         var _value = findByPath(message, value_path);
@@ -61,33 +60,10 @@ export var processedMessageByDataMap = function processedMessageByDataMap(messag
         filterFileds.push(_key);
 
         if (_value || isNumber(_value)) {
-          rowData.tags[_key] = _value;
+          rowData.tags[_key] = escapeJsonValue(_value);
           tagsStr.push(escapeRowData(_key) + '=' + escapeRowData(_value));
         }
       });
-
-      if (message.tags && isObject(message.tags) && !isEmptyObject(message.tags)) {
-        // 自定义tag
-        var _tagKeys = [];
-        each(message.tags, function (_value, _key) {
-          // 如果和之前tag重名，则舍弃
-          if (filterFileds.indexOf(_key) > -1) return;
-          filterFileds.push(_key);
-
-          if (_value || isNumber(_value)) {
-            _tagKeys.push(_key);
-
-            rowData.tags[_key] = _value;
-            tagsStr.push(escapeRowData(_key) + '=' + escapeRowData(_value));
-          }
-        });
-
-        if (_tagKeys.length) {
-          rowData.tags[CUSTOM_KEYS] = _tagKeys;
-          tagsStr.push(escapeRowData(CUSTOM_KEYS) + '=' + escapeRowData(_tagKeys));
-        }
-      }
-
       var fieldsStr = [];
       each(value.fields, function (_value, _key) {
         if (isArray(_value) && _value.length === 2) {
@@ -101,8 +77,7 @@ export var processedMessageByDataMap = function processedMessageByDataMap(messag
           if (_valueData || isNumber(_valueData)) {
             rowData.fields[_key] = _valueData; // 这里不需要转译
 
-            _valueData = type === 'string' ? '"' + _valueData.replace(/[\\]*"/g, '"').replace(/"/g, '\\"') + '"' : escapeRowData(_valueData);
-            fieldsStr.push(escapeRowData(_key) + '=' + _valueData);
+            fieldsStr.push(escapeRowData(_key) + '=' + escapeRowField(_valueData));
           }
         } else if (isString(_value)) {
           var _valueData = findByPath(message, _value);
@@ -112,11 +87,33 @@ export var processedMessageByDataMap = function processedMessageByDataMap(messag
           if (_valueData || isNumber(_valueData)) {
             rowData.fields[_key] = _valueData; // 这里不需要转译
 
-            _valueData = escapeRowData(_valueData);
-            fieldsStr.push(escapeRowData(_key) + '=' + _valueData);
+            fieldsStr.push(escapeRowData(_key) + '=' + escapeRowField(_valueData));
           }
         }
       });
+
+      if (message.tags && isObject(message.tags) && !isEmptyObject(message.tags)) {
+        // 自定义tag， 存储成field
+        var _tagKeys = [];
+        each(message.tags, function (_value, _key) {
+          // 如果和之前tag重名，则舍弃
+          if (filterFileds.indexOf(_key) > -1) return;
+          filterFileds.push(_key);
+
+          if (_value || isNumber(_value)) {
+            _tagKeys.push(_key);
+
+            rowData.fields[_key] = _value; // 这里不需要转译
+
+            fieldsStr.push(escapeRowData(_key) + '=' + escapeRowField(_value));
+          }
+        });
+
+        if (_tagKeys.length) {
+          rowData.fields[CUSTOM_KEYS] = escapeRowField(_tagKeys);
+          fieldsStr.push(escapeRowData(CUSTOM_KEYS) + '=' + escapeRowField(_tagKeys));
+        }
+      }
 
       if (tagsStr.length) {
         rowStr += tagsStr.join(',');

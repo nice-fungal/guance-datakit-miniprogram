@@ -20,7 +20,6 @@ function processAppUpdate(appinfo) {
       duration: msToNs(appinfo.duration)
     }
   };
-  console.log(appEvent, 'appEvent====');
   return {
     rawRumEvent: appEvent,
     startTime: appinfo.startTime
