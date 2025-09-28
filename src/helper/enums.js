@@ -20,7 +20,8 @@ export var RequestType = {
 export var ActionType = {
   tap: 'tap',
   longpress: 'longpress',
-  longtap: 'longtap'
+  longtap: 'longtap',
+  custom: 'custom'
 };
 export var MpHook = {
   data: 1,

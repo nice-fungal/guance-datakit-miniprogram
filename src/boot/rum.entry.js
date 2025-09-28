@@ -1,5 +1,6 @@
-import { isPercentage, extend2Lev, createContextManager, defineGlobal, getGlobalObject } from '../helper/utils';
+import { isPercentage, extend2Lev, createContextManager, defineGlobal, getGlobalObject, now, isString, isObject } from '../helper/utils';
 import { startRum } from './rum';
+import { ActionType } from '../helper/enums';
 export var makeRum = function makeRum(startRumImpl) {
   var isAlreadyInitialized = false;
   var globalContextManager = createContextManager();
@@ -7,12 +8,7 @@ export var makeRum = function makeRum(startRumImpl) {
 
   var _getInternalContext = function getInternalContext() {};
 
-  function clonedCommonContext() {
-    return extend2Lev({}, {
-      context: globalContextManager.get(),
-      user: user
-    });
-  }
+  var addActionStrategy = function addActionStrategy() {};
 
   var rumGlobal = {
     init: function init(userConfiguration) {
@@ -32,6 +28,7 @@ export var makeRum = function makeRum(startRumImpl) {
       });
 
       _getInternalContext = _startRumImpl.getInternalContext;
+      addActionStrategy = _startRumImpl.addAction;
       isAlreadyInitialized = true;
     },
     getInternalContext: function getInternalContext(startTime) {
@@ -41,6 +38,16 @@ export var makeRum = function makeRum(startRumImpl) {
     removeRumGlobalContext: globalContextManager.remove,
     getRumGlobalContext: globalContextManager.get,
     setRumGlobalContext: globalContextManager.set,
+    addAction: function addAction(name, context) {
+      if (isObject(context) && isString(name)) {
+        addActionStrategy({
+          name: name,
+          context: extend2Lev({}, context),
+          startClocks: now(),
+          type: ActionType.custom
+        });
+      }
+    },
     setUser: function setUser(newUser) {
       var sanitizedUser = sanitizeUser(newUser);
 

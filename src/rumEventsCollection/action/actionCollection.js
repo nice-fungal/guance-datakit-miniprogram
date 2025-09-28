@@ -1,6 +1,6 @@
 import { msToNs, extend2Lev } from '../../helper/utils';
 import { LifeCycleEventType } from '../../core/lifeCycle';
-import { RumEventType } from '../../helper/enums';
+import { RumEventType, ActionType } from '../../helper/enums';
 import { trackActions } from './trackActions';
 export function startActionCollection(lifeCycle, configuration) {
   lifeCycle.subscribe(LifeCycleEventType.AUTO_ACTION_COMPLETED, function (action) {
@@ -10,10 +10,18 @@ export function startActionCollection(lifeCycle, configuration) {
   if (configuration.trackInteractions) {
     trackActions(lifeCycle);
   }
+
+  return {
+    addAction: function addAction(action, savedCommonContext) {
+      lifeCycle.notify(LifeCycleEventType.RAW_RUM_EVENT_COLLECTED, extend2Lev({
+        savedCommonContext: savedCommonContext
+      }, processAction(action)));
+    }
+  };
 }
 
 function processAction(action) {
-  var autoActionProperties = {
+  var autoActionProperties = isAutoAction(action) ? {
     action: {
       error: {
         count: action.counts.errorCount
@@ -27,7 +35,12 @@ function processAction(action) {
         count: action.counts.resourceCount
       }
     }
+  } : {
+    action: {
+      loadingTime: 0
+    }
   };
+  var customerContext = !isAutoAction(action) ? action.context : undefined;
   var actionEvent = extend2Lev({
     action: {
       target: {
@@ -39,7 +52,12 @@ function processAction(action) {
     type: RumEventType.ACTION
   }, autoActionProperties);
   return {
+    customerContext: customerContext,
     rawRumEvent: actionEvent,
     startTime: action.startClocks
   };
+}
+
+function isAutoAction(action) {
+  return action.type !== ActionType.custom;
 }

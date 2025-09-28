@@ -29,9 +29,12 @@ export var startRum = function startRum(userConfiguration, getCommonContext) {
   startRequestCollection(lifeCycle, configuration);
   startPagePerformanceObservable(lifeCycle, configuration);
   startSetDataColloction(lifeCycle);
-  startActionCollection(lifeCycle, configuration);
+
+  var _startActionCollection = startActionCollection(lifeCycle, configuration);
+
   var internalContext = startInternalContext(userConfiguration.applicationId, session, parentContexts);
   return {
+    addAction: _startActionCollection.addAction,
     getInternalContext: internalContext.get
   };
 };
