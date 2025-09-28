@@ -1,4 +1,4 @@
-import { extend2Lev, urlParse, values } from '../helper/utils';
+import { extend2Lev, urlParse, values, isFunction, isBoolean } from '../helper/utils';
 import { ONE_KILO_BYTE, ONE_SECOND, TraceType } from '../helper/enums';
 var TRIM_REGIX = /^\s+|\s+$/g;
 export var DEFAULT_CONFIGURATION = {
@@ -26,7 +26,11 @@ export var DEFAULT_CONFIGURATION = {
   trackInteractions: false,
   traceType: TraceType.DDTRACE,
   traceId128Bit: false,
-  allowedTracingOrigins: [] // 新增
+  allowedTracingOrigins: [],
+  // 新增
+  isIntakeUrl: function isIntakeUrl(url) {
+    return false;
+  } // 自定义方法根据请求资源 url 判断是否需要采集对应资源数据，默认都采集。 返回：false 表示要采集，true 表示不需要采集
 
 };
 
@@ -71,6 +75,10 @@ export function commonInit(userConfiguration, buildEnv) {
     transportConfiguration.sampleRate = userConfiguration.sampleRate;
   }
 
+  if ('isIntakeUrl' in userConfiguration && isFunction(userConfiguration.isIntakeUrl) && isBoolean(userConfiguration.isIntakeUrl())) {
+    transportConfiguration.isIntakeUrl = userConfiguration.isIntakeUrl;
+  }
+
   return extend2Lev(DEFAULT_CONFIGURATION, transportConfiguration);
 }
 
@@ -87,5 +95,5 @@ var haveSameOrigin = function haveSameOrigin(url1, url2) {
 
 export function isIntakeRequest(url, configuration) {
   // return haveSameOrigin(url, configuration.datakitUrl)
-  return url.indexOf(configuration.datakitUrl) === 0;
+  return url.indexOf(configuration.datakitUrl) === 0 || configuration.isIntakeUrl(url);
 }

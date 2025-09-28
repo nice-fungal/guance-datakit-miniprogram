@@ -103,6 +103,17 @@ export var isBoolean = function isBoolean(obj) {
 export var isNumber = function isNumber(obj) {
   return toString.call(obj) === '[object Number]' && /[\d\.]+/.test(String(obj));
 };
+export var isFunction = function isFunction(f) {
+  if (!f) {
+    return false;
+  }
+
+  try {
+    return /^\s*\bfunction\b/.test(f);
+  } catch (err) {
+    return false;
+  }
+};
 export var isArray = nativeIsArray || function (obj) {
   return toString.call(obj) === '[object Array]';
 };
