@@ -1,3 +1,4 @@
+import { isArray } from '../helper/utils';
 export var ErrorSource = {
   AGENT: 'agent',
   CONSOLE: 'console',
@@ -23,12 +24,16 @@ export function formatUnknownError(stackTrace, errorObject, nonErrorPrefix) {
 }
 export function toStackTraceString(stack) {
   var result = stack.name || 'Error' + ': ' + stack.message;
-  stack.stack.forEach(function (frame) {
-    var func = frame.func === '?' ? '<anonymous>' : frame.func;
-    var args = frame.args && frame.args.length > 0 ? '(' + frame.args.join(', ') + ')' : '';
-    var line = frame.line ? ':' + frame.line : '';
-    var column = frame.line && frame.column ? ':' + frame.column : '';
-    result += '\n  at ' + func + args + ' @ ' + frame.url + line + column;
-  });
+
+  if (isArray(stack.stack)) {
+    stack.stack.forEach(function (frame) {
+      var func = frame.func === '?' ? '<anonymous>' : frame.func;
+      var args = frame.args && frame.args.length > 0 ? '(' + frame.args.join(', ') + ')' : '';
+      var line = frame.line ? ':' + frame.line : '';
+      var column = frame.line && frame.column ? ':' + frame.column : '';
+      result += '\n  at ' + func + args + ' @ ' + frame.url + line + column;
+    });
+  }
+
   return result;
 }
