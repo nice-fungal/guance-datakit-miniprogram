@@ -373,7 +373,7 @@ export var safeJSONParse = function safeJSONParse(str) {
 
   return val;
 };
-export var now = Date.now || function () {
+export var now = function now() {
   return new Date().getTime();
 };
 export var throttle = function throttle(fn, wait, options) {
