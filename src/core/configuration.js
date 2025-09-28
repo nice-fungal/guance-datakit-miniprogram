@@ -46,6 +46,7 @@ export function commonInit(userConfiguration, buildEnv) {
     version: userConfiguration.version || '',
     sdkVersion: buildEnv.sdkVersion,
     sdkName: buildEnv.sdkName,
+    service: userConfiguration.service || '',
     datakitUrl: getDatakitUrlUrl(userConfiguration.datakitUrl || userConfiguration.datakitOrigin),
     tags: userConfiguration.tags || []
   };
