@@ -25,7 +25,7 @@ export function trackActions(lifeCycle) {
   var originComponent = Component;
 
   Component = function Component(component) {
-    var methods = getMethods(component);
+    var methods = getMethods(component.methods);
     methods.forEach(methodName => {
       clickProxy(component, methodName, function (_action) {
         action.create(_action.type, _action.name);
