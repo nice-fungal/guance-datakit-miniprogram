@@ -10,13 +10,19 @@ function randomTraceId() {
 }
 
 /**
- * 
+ *
  * @param {*} configuration  配置信息
  */
 export function ZipkinSingleTracer(configuration) {
   var rootSpanId = randomTraceId();
   this._traceId = randomTraceId() + rootSpanId;
   this._spanId = rootSpanId;
+  if (configuration.generateTraceId && typeof configuration.generateTraceId === 'function') {
+    var customTraceId = configuration.generateTraceId();
+    if (typeof customTraceId === 'string') {
+      this.customTraceId = customTraceId;
+    }
+  }
 }
 ZipkinSingleTracer.prototype = {
   isTracingSupported: function isTracingSupported() {
@@ -26,15 +32,16 @@ ZipkinSingleTracer.prototype = {
     return this._spanId;
   },
   getTraceId: function getTraceId() {
+    if (this.customTraceId) return this.customTraceId;
     return this._traceId;
   },
   getB3Str: function getB3Str() {
     //{TraceId}-{SpanId}-{SamplingState}-{ParentSpanId}
-    return this._traceId + '-' + this._spanId + '-1';
+    return this.getTraceId() + '-' + this.getSpanId() + '-1';
   },
   makeTracingHeaders: function makeTracingHeaders() {
     return {
-      'b3': this.getB3Str()
+      b3: this.getB3Str()
     };
   }
 };

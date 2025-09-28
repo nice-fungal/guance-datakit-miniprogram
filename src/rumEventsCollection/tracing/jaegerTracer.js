@@ -10,7 +10,7 @@ function randomTraceId() {
 }
 
 /**
- * 
+ *
  * @param {*} configuration  配置信息
  */
 export function JaegerTracer(configuration) {
@@ -23,6 +23,12 @@ export function JaegerTracer(configuration) {
     this._traceId = rootSpanId;
   }
   this._spanId = rootSpanId;
+  if (configuration.generateTraceId && typeof configuration.generateTraceId === 'function') {
+    var customTraceId = configuration.generateTraceId();
+    if (typeof customTraceId === 'string') {
+      this.customTraceId = customTraceId;
+    }
+  }
 }
 JaegerTracer.prototype = {
   isTracingSupported: function isTracingSupported() {
@@ -32,11 +38,12 @@ JaegerTracer.prototype = {
     return this._spanId;
   },
   getTraceId: function getTraceId() {
+    if (this.customTraceId) return this.customTraceId;
     return this._traceId;
   },
   getUberTraceId: function getUberTraceId() {
     //{trace-id}:{span-id}:{parent-span-id}:{flags}
-    return this._traceId + ':' + this._spanId + ':' + '0' + ':' + '1';
+    return this.getTraceId() + ':' + this.getSpanId() + ':' + '0' + ':' + '1';
   },
   makeTracingHeaders: function makeTracingHeaders() {
     return {

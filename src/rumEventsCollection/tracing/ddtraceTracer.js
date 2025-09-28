@@ -9,12 +9,18 @@ function randomTraceId() {
   return n;
 }
 /**
- * 
+ *
  * @param {*} configuration  配置信息
  */
 export function DDtraceTracer(configuration) {
   this._spanId = randomTraceId();
   this._traceId = randomTraceId();
+  if (configuration.generateTraceId && typeof configuration.generateTraceId === 'function') {
+    var customTraceId = configuration.generateTraceId();
+    if (typeof customTraceId === 'string') {
+      this.customTraceId = customTraceId;
+    }
+  }
 }
 DDtraceTracer.prototype = {
   isTracingSupported: function isTracingSupported() {
@@ -24,6 +30,7 @@ DDtraceTracer.prototype = {
     return this._spanId;
   },
   getTraceId: function getTraceId() {
+    if (this.customTraceId) return this.customTraceId;
     return this._traceId;
   },
   makeTracingHeaders: function makeTracingHeaders() {

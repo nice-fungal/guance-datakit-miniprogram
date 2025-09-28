@@ -47,7 +47,7 @@ export function injectHeadersIfTracingAllowed(configuration, context, inject) {
   var tracer;
   switch (configuration.traceType) {
     case TraceType.DDTRACE:
-      tracer = new DDtraceTracer();
+      tracer = new DDtraceTracer(configuration);
       break;
     case TraceType.SKYWALKING_V3:
       tracer = new SkyWalkingTracer(configuration, context.url);

@@ -56,7 +56,8 @@ export function commonInit(userConfiguration, buildEnv) {
     service: userConfiguration.service || 'miniapp',
     datakitUrl: getDatakitEndPoint(userConfiguration),
     tags: userConfiguration.tags || [],
-    injectTraceHeader: userConfiguration.injectTraceHeader && catchUserErrors(userConfiguration.injectTraceHeader, 'injectTraceHeader threw an error:')
+    injectTraceHeader: userConfiguration.injectTraceHeader && catchUserErrors(userConfiguration.injectTraceHeader, 'injectTraceHeader threw an error:'),
+    generateTraceId: userConfiguration.generateTraceId && catchUserErrors(userConfiguration.generateTraceId, 'generateTraceId threw an error:')
   };
   if ('trackInteractions' in userConfiguration) {
     transportConfiguration.trackInteractions = !!userConfiguration.trackInteractions;

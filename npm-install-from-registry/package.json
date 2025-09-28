@@ -2,6 +2,6 @@
   "name": "npm-install-from-registry",
   "version": "0.0.0",
   "devDependencies": {
-    "@cloudcare/rum-miniapp": "2.2.2"
+    "@cloudcare/rum-miniapp": "2.2.3"
   }
 }

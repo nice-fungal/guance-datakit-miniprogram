@@ -11,7 +11,7 @@ function uuid() {
 }
 
 /**
- * 
+ *
  * @param {*} configuration  配置信息
  * @param {*} requestUrl 请求的url
  */
@@ -22,6 +22,12 @@ export function SkyWalkingTracer(configuration, requestUrl) {
   this._env = configuration.env;
   this._version = configuration.version;
   this._urlParse = urlParse(requestUrl).getParse();
+  if (configuration.generateTraceId && typeof configuration.generateTraceId === 'function') {
+    var customTraceId = configuration.generateTraceId();
+    if (typeof customTraceId === 'string') {
+      this.customTraceId = customTraceId;
+    }
+  }
 }
 SkyWalkingTracer.prototype = {
   isTracingSupported: function isTracingSupported() {
@@ -32,12 +38,13 @@ SkyWalkingTracer.prototype = {
     return this._spanId;
   },
   getTraceId: function getTraceId() {
+    if (this.customTraceId) return this.customTraceId;
     return this._traceId;
   },
   getSkyWalkingSw8: function getSkyWalkingSw8() {
     try {
-      var traceIdStr = String(base64Encode(this._traceId));
-      var segmentId = String(base64Encode(this._spanId));
+      var traceIdStr = String(base64Encode(this.getTraceId()));
+      var segmentId = String(base64Encode(this.getSpanId()));
       var service = String(base64Encode(this._applicationId + '_rum_' + this.env));
       var instance = String(base64Encode(this._version));
       var activePage = getActivePage();
@@ -56,7 +63,7 @@ SkyWalkingTracer.prototype = {
   },
   makeTracingHeaders: function makeTracingHeaders() {
     return {
-      'sw8': this.getSkyWalkingSw8()
+      sw8: this.getSkyWalkingSw8()
     };
   }
 };

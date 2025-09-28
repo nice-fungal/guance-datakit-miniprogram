@@ -10,7 +10,7 @@ function randomTraceId() {
 }
 
 /**
- * 
+ *
  * @param {*} configuration  配置信息
  */
 export function ZipkinMultiTracer(configuration) {
@@ -22,6 +22,12 @@ export function ZipkinMultiTracer(configuration) {
     this._traceId = rootSpanId;
   }
   this._spanId = rootSpanId;
+  if (configuration.generateTraceId && typeof configuration.generateTraceId === 'function') {
+    var customTraceId = configuration.generateTraceId();
+    if (typeof customTraceId === 'string') {
+      this.customTraceId = customTraceId;
+    }
+  }
 }
 ZipkinMultiTracer.prototype = {
   isTracingSupported: function isTracingSupported() {
@@ -31,6 +37,7 @@ ZipkinMultiTracer.prototype = {
     return this._spanId;
   },
   getTraceId: function getTraceId() {
+    if (this.customTraceId) return this.customTraceId;
     return this._traceId;
   },
   makeTracingHeaders: function makeTracingHeaders() {
