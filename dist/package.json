@@ -1,0 +1,11 @@
+{
+  "name": "@cloudcare/rum-miniapp",
+  "version": "2.2.10-1",
+  "main": "index.js",
+  "scripts": {
+    "dist": "terser --comments false --compress --timings --format beautify --output ./index.js ./dataflux-rum-miniapp.js"
+  },
+  "devDependencies": {
+    "terser": "5.5.1"
+  }
+}
