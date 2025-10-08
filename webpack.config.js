@@ -4,11 +4,14 @@ module.exports = (env, args) => {
 	let baseConfig = {
 		mode: args.mode,
 		entry: './src/index.js',
+		experiments: {
+			outputModule: true,
+		},
 		output: {
 			filename: 'dataflux-rum-miniapp.js',
-			path: path.resolve(__dirname, './demo/miniprogram'),
+			path: path.resolve(__dirname, './dist'),
 			library: {
-				type: 'commonjs2',
+				type: 'module',
 			},
 		},
 		devtool: args.mode === 'development' ? 'inline-source-map' : 'source-map',
@@ -16,7 +19,7 @@ module.exports = (env, args) => {
 	if (args.mode !== 'development') {
 		baseConfig = Object.assign(baseConfig, {
 			optimization: {
-				minimize: true,
+				minimize: false,
 				minimizer: [
 					new TerserPlugin({
 						terserOptions: {
