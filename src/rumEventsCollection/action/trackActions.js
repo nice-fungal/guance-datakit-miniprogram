@@ -1,9 +1,9 @@
-import { elapsed, now, UUID, getMethods, isObject } from '../../helper/utils';
+import { elapsed, now, UUID /*, getMethods, isObject */ } from '../../helper/utils';
 import { LifeCycleEventType } from '../../core/lifeCycle';
 // import { MinaTouch } from '../../core/miniaTouch';
 import { trackEventCounts } from '../trackEventCounts';
 import { waitIdlePageActivity } from '../trackPageActiveites';
-import { ActionType } from '../../helper/enums';
+// import { ActionType } from '../../helper/enums';
 export function trackActions(lifeCycle) {
   var action = startActionManagement(lifeCycle);
 
@@ -11,28 +11,28 @@ export function trackActions(lifeCycle) {
   lifeCycle.subscribe(LifeCycleEventType.VIEW_CREATED, function () {
     action.discardCurrent();
   });
-  var hookClick = function hookClick(instance) {
-    var methods = getMethods(instance);
-    methods.forEach(methodName => {
-      clickProxy(instance, methodName, function (_action) {
-        action.create(_action.type, _action.name);
-      }, lifeCycle);
-    });
-  };
-  var originPage = Page;
-  Page = function Page(page) {
-    try {
-      hookClick(page);
-    } catch (error) {}
-    return originPage(page);
-  };
-  var originComponent = Component;
-  Component = function Component(component) {
-    try {
-      hookClick(component.methods);
-    } catch (error) {}
-    return originComponent(component);
-  };
+  // var hookClick = function hookClick(instance) {
+  //   var methods = getMethods(instance);
+  //   methods.forEach(methodName => {
+  //     clickProxy(instance, methodName, function (_action) {
+  //       action.create(_action.type, _action.name);
+  //     }, lifeCycle);
+  //   });
+  // };
+  // var originPage = Page;
+  // Page = function Page(page) {
+  //   try {
+  //     hookClick(page);
+  //   } catch (error) {}
+  //   return originPage(page);
+  // };
+  // var originComponent = Component;
+  // Component = function Component(component) {
+  //   try {
+  //     hookClick(component.methods);
+  //   } catch (error) {}
+  //   return originComponent(component);
+  // };
   return {
     stop: function stop() {
       action.discardCurrent();
@@ -40,49 +40,49 @@ export function trackActions(lifeCycle) {
     }
   };
 }
-function clickProxy(page, methodName, callback, lifeCycle) {
-  var oirginMethod = page[methodName];
-  page[methodName] = function () {
-    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-    var result = oirginMethod.apply(this, arguments);
-    var action = {};
-    if (isObject(arguments[0])) {
-      var currentTarget = arguments[0].currentTarget || {};
-      var dataset = currentTarget.dataset || {};
-      var actionType = arguments[0].type;
-      if (actionType && ActionType[actionType]) {
-        action.type = actionType;
-        action.name = dataset.name || dataset.content || dataset.type;
-        callback(action);
-        lifeCycle.notify(LifeCycleEventType.PAGE_ALIAS_ACTION, true);
-      } else if (methodName === 'onAddToFavorites') {
-        action.type = 'click';
-        action.name = '收藏 ' + '标题: ' + (result && result.title) + (result.query ? ' query: ' + result.query : '');
-        callback(action);
-        lifeCycle.notify(LifeCycleEventType.PAGE_ALIAS_ACTION, true);
-      } else if (methodName === 'onShareAppMessage') {
-        action.type = 'click';
-        action.name = '转发 ' + '标题: ' + (result && result.title) + (result.path ? ' path: ' + result.path : '');
-        callback(action);
-        lifeCycle.notify(LifeCycleEventType.PAGE_ALIAS_ACTION, true);
-      } else if (methodName === 'onShareTimeline') {
-        action.type = 'click';
-        action.name = '分享到朋友圈 ' + '标题: ' + (result && result.title) + (result.query ? ' query: ' + result.query : '');
-        callback(action);
-        lifeCycle.notify(LifeCycleEventType.PAGE_ALIAS_ACTION, true);
-      } else if (methodName === 'onTabItemTap') {
-        var item = arguments.length && arguments[0];
-        action.type = 'click';
-        action.name = 'tab ' + '名称: ' + item.text + (item.pagePath ? ' 跳转到: ' + item.pagePath : '');
-        callback(action);
-        lifeCycle.notify(LifeCycleEventType.PAGE_ALIAS_ACTION, true);
-      }
-    }
-    return result;
-  };
-}
+// function clickProxy(page, methodName, callback, lifeCycle) {
+//   var oirginMethod = page[methodName];
+//   page[methodName] = function () {
+//     for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+//       args[_key] = arguments[_key];
+//     }
+//     var result = oirginMethod.apply(this, arguments);
+//     var action = {};
+//     if (isObject(arguments[0])) {
+//       var currentTarget = arguments[0].currentTarget || {};
+//       var dataset = currentTarget.dataset || {};
+//       var actionType = arguments[0].type;
+//       if (actionType && ActionType[actionType]) {
+//         action.type = actionType;
+//         action.name = dataset.name || dataset.content || dataset.type;
+//         callback(action);
+//         lifeCycle.notify(LifeCycleEventType.PAGE_ALIAS_ACTION, true);
+//       } else if (methodName === 'onAddToFavorites') {
+//         action.type = 'click';
+//         action.name = '收藏 ' + '标题: ' + (result && result.title) + (result.query ? ' query: ' + result.query : '');
+//         callback(action);
+//         lifeCycle.notify(LifeCycleEventType.PAGE_ALIAS_ACTION, true);
+//       } else if (methodName === 'onShareAppMessage') {
+//         action.type = 'click';
+//         action.name = '转发 ' + '标题: ' + (result && result.title) + (result.path ? ' path: ' + result.path : '');
+//         callback(action);
+//         lifeCycle.notify(LifeCycleEventType.PAGE_ALIAS_ACTION, true);
+//       } else if (methodName === 'onShareTimeline') {
+//         action.type = 'click';
+//         action.name = '分享到朋友圈 ' + '标题: ' + (result && result.title) + (result.query ? ' query: ' + result.query : '');
+//         callback(action);
+//         lifeCycle.notify(LifeCycleEventType.PAGE_ALIAS_ACTION, true);
+//       } else if (methodName === 'onTabItemTap') {
+//         var item = arguments.length && arguments[0];
+//         action.type = 'click';
+//         action.name = 'tab ' + '名称: ' + item.text + (item.pagePath ? ' 跳转到: ' + item.pagePath : '');
+//         callback(action);
+//         lifeCycle.notify(LifeCycleEventType.PAGE_ALIAS_ACTION, true);
+//       }
+//     }
+//     return result;
+//   };
+// }
 function startActionManagement(lifeCycle) {
   var currentAction;
   var currentIdlePageActivitySubscription;
