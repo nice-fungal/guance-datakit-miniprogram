@@ -1,6 +1,6 @@
 import { elapsed, now, UUID, getMethods, isObject } from '../../helper/utils';
 import { LifeCycleEventType } from '../../core/lifeCycle';
-import { MinaTouch } from '../../core/miniaTouch';
+// import { MinaTouch } from '../../core/miniaTouch';
 import { trackEventCounts } from '../trackEventCounts';
 import { waitIdlePageActivity } from '../trackPageActiveites';
 import { ActionType } from '../../helper/enums';
