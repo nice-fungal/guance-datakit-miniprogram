@@ -314,23 +314,23 @@ export var isEmptyObject = function isEmptyObject(obj) {
     return false;
   }
 };
-export var isJSONString = function isJSONString(str) {
-  try {
-    JSON.parse(str);
-  } catch (e) {
-    return false;
-  }
-  return true;
-};
-export var safeJSONParse = function safeJSONParse(str) {
-  var val = null;
-  try {
-    val = JSON.parse(str);
-  } catch (e) {
-    return false;
-  }
-  return val;
-};
+// export var isJSONString = function isJSONString(str) {
+//   try {
+//     JSON.parse(str);
+//   } catch (e) {
+//     return false;
+//   }
+//   return true;
+// };
+// export var safeJSONParse = function safeJSONParse(str) {
+//   var val = null;
+//   try {
+//     val = JSON.parse(str);
+//   } catch (e) {
+//     return false;
+//   }
+//   return val;
+// };
 export var now = function now() {
   return new Date().getTime();
 };
@@ -517,54 +517,54 @@ export var urlParse = function urlParse(para) {
   };
   return new URLParser(para);
 };
-export var getOwnObjectKeys = function getOwnObjectKeys(obj, isEnumerable) {
-  var keys = Object.keys(obj);
-  if (Object.getOwnPropertySymbols) {
-    var symbols = Object.getOwnPropertySymbols(obj);
-    if (isEnumerable) {
-      symbols = symbols.filter(function (t) {
-        return Object.getOwnPropertyDescriptor(obj, t).enumerable;
-      });
-    }
-    keys.push.apply(keys, symbols);
-  }
-  return keys;
-};
-export var defineObject = function defineObject(obj, key, value) {
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    });
-  } else {
-    obj[key] = value;
-  }
-  return obj;
-};
-export var deepMixObject = function deepMixObject(targetObj) {
-  for (var t = 1; t < arguments.length; t++) {
-    var target = arguments[t] != null ? arguments[t] : {};
-    if (t % 2) {
-      getOwnObjectKeys(Object(target), true).forEach(function (t) {
-        defineObject(targetObj, t, target[t]);
-      });
-    } else {
-      if (Object.getOwnPropertyDescriptors) {
-        Object.defineProperties(targetObj, Object.getOwnPropertyDescriptors(target));
-      } else {
-        getOwnObjectKeys(Object(target)).forEach(function (t) {
-          Object.defineProperty(targetObj, t, Object.getOwnPropertyDescriptor(target, t));
-        });
-      }
-    }
-  }
-  return targetObj;
-};
-export function getOrigin(url) {
-  return urlParse(url).getParse().Origin;
-}
+// export var getOwnObjectKeys = function getOwnObjectKeys(obj, isEnumerable) {
+//   var keys = Object.keys(obj);
+//   if (Object.getOwnPropertySymbols) {
+//     var symbols = Object.getOwnPropertySymbols(obj);
+//     if (isEnumerable) {
+//       symbols = symbols.filter(function (t) {
+//         return Object.getOwnPropertyDescriptor(obj, t).enumerable;
+//       });
+//     }
+//     keys.push.apply(keys, symbols);
+//   }
+//   return keys;
+// };
+// export var defineObject = function defineObject(obj, key, value) {
+//   if (key in obj) {
+//     Object.defineProperty(obj, key, {
+//       value,
+//       enumerable: true,
+//       configurable: true,
+//       writable: true
+//     });
+//   } else {
+//     obj[key] = value;
+//   }
+//   return obj;
+// };
+// export var deepMixObject = function deepMixObject(targetObj) {
+//   for (var t = 1; t < arguments.length; t++) {
+//     var target = arguments[t] != null ? arguments[t] : {};
+//     if (t % 2) {
+//       getOwnObjectKeys(Object(target), true).forEach(function (t) {
+//         defineObject(targetObj, t, target[t]);
+//       });
+//     } else {
+//       if (Object.getOwnPropertyDescriptors) {
+//         Object.defineProperties(targetObj, Object.getOwnPropertyDescriptors(target));
+//       } else {
+//         getOwnObjectKeys(Object(target)).forEach(function (t) {
+//           Object.defineProperty(targetObj, t, Object.getOwnPropertyDescriptor(target, t));
+//         });
+//       }
+//     }
+//   }
+//   return targetObj;
+// };
+// export function getOrigin(url) {
+//   return urlParse(url).getParse().Origin;
+// }
 export function getActivePage() {
   var curPages = typeof getCurrentPages === "function" ? getCurrentPages() : [];
   if (curPages.length) {
@@ -696,16 +696,16 @@ export function getGlobalObject() {
   }
   return globalObject;
 }
-export function assign(target) {
-  each(slice.call(arguments, 1), function (source) {
-    for (var prop in source) {
-      if (Object.prototype.hasOwnProperty.call(source, prop)) {
-        target[prop] = source[prop];
-      }
-    }
-  });
-  return target;
-}
-export function shallowClone(object) {
-  return assign({}, object);
-}
+// export function assign(target) {
+//   each(slice.call(arguments, 1), function (source) {
+//     for (var prop in source) {
+//       if (Object.prototype.hasOwnProperty.call(source, prop)) {
+//         target[prop] = source[prop];
+//       }
+//     }
+//   });
+//   return target;
+// }
+// export function shallowClone(object) {
+//   return assign({}, object);
+// }

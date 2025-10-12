@@ -83,11 +83,11 @@ function hasTraceType(traceType) {
   if (traceType && values(TraceType).indexOf(traceType) > -1) return true;
   return false;
 }
-var haveSameOrigin = function haveSameOrigin(url1, url2) {
-  var parseUrl1 = urlParse(url1).getParse();
-  var parseUrl2 = urlParse(url2).getParse();
-  return parseUrl1.Origin === parseUrl2.Origin;
-};
+// var haveSameOrigin = function haveSameOrigin(url1, url2) {
+//   var parseUrl1 = urlParse(url1).getParse();
+//   var parseUrl2 = urlParse(url2).getParse();
+//   return parseUrl1.Origin === parseUrl2.Origin;
+// };
 export function isIntakeRequest(url, configuration) {
   // return haveSameOrigin(url, configuration.datakitUrl)
   return url.indexOf(configuration.datakitUrl) === 0 || configuration.isIntakeUrl(url);

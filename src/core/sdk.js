@@ -1,4 +1,4 @@
-import { deepMixObject } from '../helper/utils';
+// import { deepMixObject } from '../helper/utils';
 function getSDK() {
   var sdk = null,
     tracker = '';

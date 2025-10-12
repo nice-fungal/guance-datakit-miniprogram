@@ -185,6 +185,6 @@ export function computeSize(entry) {
   }
   return undefined;
 }
-export function isAllowedRequestUrl(configuration, url) {
-  return url && !isIntakeRequest(url, configuration);
-}
+// export function isAllowedRequestUrl(configuration, url) {
+//   return url && !isIntakeRequest(url, configuration);
+// }

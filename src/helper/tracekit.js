@@ -6,18 +6,18 @@ function has(object, key) {
 function isUndefined(what) {
   return typeof what === 'undefined';
 }
-export function wrap(func) {
-  var _this = this;
-  function wrapped() {
-    try {
-      return func.apply(_this, arguments);
-    } catch (e) {
-      report(e);
-      throw e;
-    }
-  }
-  return wrapped;
-}
+// export function wrap(func) {
+//   var _this = this;
+//   function wrapped() {
+//     try {
+//       return func.apply(_this, arguments);
+//     } catch (e) {
+//       report(e);
+//       throw e;
+//     }
+//   }
+//   return wrapped;
+// }
 /**
  * Cross-browser processing of unhandled exceptions
  *
