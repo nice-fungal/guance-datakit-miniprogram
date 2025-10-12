@@ -1,4 +1,4 @@
-import { extend, now, throttle, UUID, isNumber, getActivePage, getMethods } from '../../helper/utils';
+import { now, throttle, UUID, isNumber, getActivePage } from '../../helper/utils';
 import { trackEventCounts } from '../trackEventCounts';
 import { LifeCycleEventType } from '../../core/lifeCycle';
 // 劫持原小程序App方法
