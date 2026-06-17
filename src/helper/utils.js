@@ -1,5 +1,5 @@
-import { MpHook } from './enums';
-import { jsonStringify } from '../helper/jsonStringify';
+import { MpHook } from "./enums";
+import { jsonStringify } from "../helper/jsonStringify";
 var ArrayProto = Array.prototype;
 var ObjProto = Object.prototype;
 var ObjProto = Object.prototype;
@@ -10,7 +10,7 @@ var nativeForEach = ArrayProto.forEach;
 var nativeIsArray = Array.isArray;
 var breaker = false;
 export var isArguments = function isArguments(obj) {
-  return !!(obj && hasOwnProperty.call(obj, 'callee'));
+  return !!(obj && hasOwnProperty.call(obj, "callee"));
 };
 export var each = function each(obj, iterator, context) {
   if (obj === null) return false;
@@ -75,7 +75,7 @@ export function toServerDuration(duration) {
   return round(duration * 1e6, 0);
 }
 export function msToNs(duration) {
-  if (typeof duration !== 'number') {
+  if (typeof duration !== "number") {
     return duration;
   }
   return round(duration * 1e6, 0);
@@ -84,16 +84,16 @@ export var isUndefined = function isUndefined(obj) {
   return obj === void 0;
 };
 export var isString = function isString(obj) {
-  return toString.call(obj) === '[object String]';
+  return toString.call(obj) === "[object String]";
 };
 export var isDate = function isDate(obj) {
-  return toString.call(obj) === '[object Date]';
+  return toString.call(obj) === "[object Date]";
 };
 export var isBoolean = function isBoolean(obj) {
-  return toString.call(obj) === '[object Boolean]';
+  return toString.call(obj) === "[object Boolean]";
 };
 export var isNumber = function isNumber(obj) {
-  return toString.call(obj) === '[object Number]' && /[\d\.]+/.test(String(obj));
+  return toString.call(obj) === "[object Number]" && /[\d\.]+/.test(String(obj));
 };
 export var isFunction = function isFunction(f) {
   if (!f) {
@@ -106,7 +106,7 @@ export var isFunction = function isFunction(f) {
   }
 };
 export var isArray = nativeIsArray || function (obj) {
-  return toString.call(obj) === '[object Array]';
+  return toString.call(obj) === "[object Array]";
 };
 export var toArray = function toArray(iterable) {
   if (!iterable) return [];
@@ -140,8 +140,8 @@ export function UUID(placeholder) {
   (parseInt(placeholder, 10) ^ Math.random() * 16 >> parseInt(placeholder, 10) / 4).toString(16) : "".concat(1e7, "-", 1e3, "-", 4e3, "-", 8e3, "-", 1e11).replace(/[018]/g, UUID);
 }
 export var utf8Encode = function utf8Encode(string) {
-  string = (string + '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-  var utftext = '',
+  string = (string + "").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  var utftext = "",
     start,
     end;
   var stringl = 0,
@@ -173,7 +173,7 @@ export var utf8Encode = function utf8Encode(string) {
 };
 export var base64Encode = function base64Encode(data) {
   data = String(data);
-  var b64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+  var b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
   var o1,
     o2,
     o3,
@@ -184,7 +184,7 @@ export var base64Encode = function base64Encode(data) {
     bits,
     i = 0,
     ac = 0,
-    enc = '',
+    enc = "",
     tmp_arr = [];
   if (!data) {
     return data;
@@ -201,19 +201,19 @@ export var base64Encode = function base64Encode(data) {
     h4 = bits & 0x3f;
     tmp_arr[ac++] = b64.charAt(h1) + b64.charAt(h2) + b64.charAt(h3) + b64.charAt(h4);
   } while (i < data.length);
-  enc = tmp_arr.join('');
+  enc = tmp_arr.join("");
   switch (data.length % 3) {
     case 1:
-      enc = enc.slice(0, -2) + '==';
+      enc = enc.slice(0, -2) + "==";
       break;
     case 2:
-      enc = enc.slice(0, -1) + '=';
+      enc = enc.slice(0, -1) + "=";
       break;
   }
   return enc;
 };
 function hasToJSON(value) {
-  return typeof value === 'object' && value !== null && value.hasOwnProperty('toJSON');
+  return typeof value === "object" && value !== null && value.hasOwnProperty("toJSON");
 }
 export function elapsed(start, end) {
   return end - start;
@@ -222,7 +222,7 @@ export function getMethods(obj) {
   var isExcludeMpHook = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
   var funcs = [];
   for (var key in obj) {
-    if (typeof obj[key] === 'function' && (!isExcludeMpHook || !MpHook[key])) {
+    if (typeof obj[key] === "function" && (!isExcludeMpHook || !MpHook[key])) {
       funcs.push(key);
     }
   }
@@ -231,34 +231,34 @@ export function getMethods(obj) {
 // 替换url包含数字的路由
 export function replaceNumberCharByPath(path) {
   if (path) {
-    return path.replace(/\/([^\/]*)\d([^\/]*)/g, '/?');
+    return path.replace(/\/([^\/]*)\d([^\/]*)/g, "/?");
   } else {
-    return '';
+    return "";
   }
 }
 export function getStatusGroup(status) {
   if (!status) return status;
-  return String(status).substr(0, 1) + String(status).substr(1).replace(/\d*/g, 'x');
+  return String(status).substr(0, 1) + String(status).substr(1).replace(/\d*/g, "x");
 }
 export var getQueryParamsFromUrl = function getQueryParamsFromUrl(url) {
   var result = {};
-  var arr = url.split('?');
-  var queryString = arr[1] || '';
+  var arr = url.split("?");
+  var queryString = arr[1] || "";
   if (queryString) {
-    result = getURLSearchParams('?' + queryString);
+    result = getURLSearchParams("?" + queryString);
   }
   return result;
 };
 export var getURLSearchParams = function getURLSearchParams(queryString) {
-  queryString = queryString || '';
+  queryString = queryString || "";
   var decodeParam = function decodeParam(str) {
     return decodeURIComponent(str);
   };
   var args = {};
   var query = queryString.substring(1);
-  var pairs = query.split('&');
+  var pairs = query.split("&");
   for (var i = 0; i < pairs.length; i++) {
-    var pos = pairs[i].indexOf('=');
+    var pos = pairs[i].indexOf("=");
     if (pos === -1) continue;
     var name = pairs[i].substring(0, pos);
     var value = pairs[i].substring(pos + 1);
@@ -296,11 +296,11 @@ export var extend2Lev = function extend2Lev(obj) {
   return obj;
 };
 export var trim = function trim(str) {
-  return str.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+  return str.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, "");
 };
 export var isObject = function isObject(obj) {
   if (obj === null) return false;
-  return toString.call(obj) === '[object Object]';
+  return toString.call(obj) === "[object Object]";
 };
 export var isEmptyObject = function isEmptyObject(obj) {
   if (isObject(obj)) {
@@ -377,7 +377,7 @@ export function performDraw(threshold) {
   return threshold !== 0 && Math.random() * 100 <= threshold;
 }
 export function findByPath(source, path) {
-  var pathArr = path.split('.');
+  var pathArr = path.split(".");
   while (pathArr.length) {
     var key = pathArr.shift();
     if (source && key in source && hasOwnProperty.call(source, key)) {
@@ -399,25 +399,25 @@ export function deepSnakeCase(candidate) {
   if (Array.isArray(candidate)) {
     return candidate.map(value => deepSnakeCase(value));
   }
-  if (typeof candidate === 'object' && candidate !== null) {
+  if (typeof candidate === "object" && candidate !== null) {
     return withSnakeCaseKeys(candidate);
   }
   return candidate;
 }
 export function toSnakeCase(word) {
   return word.replace(/[A-Z]/g, function (uppercaseLetter, index) {
-    return (index !== 0 ? '_' : '') + uppercaseLetter.toLowerCase();
-  }).replace(/-/g, '_');
+    return (index !== 0 ? "_" : "") + uppercaseLetter.toLowerCase();
+  }).replace(/-/g, "_");
 }
 export function escapeRowData(str) {
-  if (typeof str === 'object' && str) {
+  if (typeof str === "object" && str) {
     str = jsonStringify(str);
   } else if (!isString(str)) {
     return str;
   }
   var reg = /[\s=,"]/g;
   return String(str).replace(reg, function (word) {
-    return '\\' + word;
+    return "\\" + word;
   });
 }
 export function escapeJsonValue(value) {
@@ -428,10 +428,10 @@ export function escapeJsonValue(value) {
   }
 }
 export function escapeFieldValueStr(str) {
-  return '"' + str.replace(/[\\]*"/g, '"').replace(/"/g, '\\"') + '"';
+  return '"' + str.replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"';
 }
 export function escapeRowField(value) {
-  if (typeof value === 'object' && value) {
+  if (typeof value === "object" && value) {
     return escapeFieldValueStr(jsonStringify(value));
   } else if (isString(value)) {
     return escapeFieldValueStr(value);
@@ -455,7 +455,7 @@ export var urlParse = function urlParse(para) {
     this._values = {};
     this._regex = null;
     this._regex = /^((\w+):\/\/)?((\w+):?(\w+)?@)?([^\/\?:]+):?(\d+)?(\/?[^\?#]+)?\??([^#]+)?#?(\w*)/;
-    if (typeof a != 'undefined') {
+    if (typeof a != "undefined") {
       this._parse(a);
     }
   };
@@ -464,25 +464,25 @@ export var urlParse = function urlParse(para) {
   };
   URLParser.prototype._initValues = function () {
     for (var a in this._fields) {
-      this._values[a] = '';
+      this._values[a] = "";
     }
   };
   URLParser.prototype.addQueryString = function (queryObj) {
-    if (typeof queryObj !== 'object') {
+    if (typeof queryObj !== "object") {
       return false;
     }
-    var query = this._values.QueryString || '';
+    var query = this._values.QueryString || "";
     for (var i in queryObj) {
-      if (new RegExp(i + '[^&]+').test(query)) {
-        query = query.replace(new RegExp(i + '[^&]+'), i + '=' + queryObj[i]);
+      if (new RegExp(i + "[^&]+").test(query)) {
+        query = query.replace(new RegExp(i + "[^&]+"), i + "=" + queryObj[i]);
       } else {
-        if (query.slice(-1) === '&') {
-          query = query + i + '=' + queryObj[i];
+        if (query.slice(-1) === "&") {
+          query = query + i + "=" + queryObj[i];
         } else {
-          if (query === '') {
-            query = i + '=' + queryObj[i];
+          if (query === "") {
+            query = i + "=" + queryObj[i];
           } else {
-            query = query + '&' + i + '=' + queryObj[i];
+            query = query + "&" + i + "=" + queryObj[i];
           }
         }
       }
@@ -493,27 +493,27 @@ export var urlParse = function urlParse(para) {
     return this._values;
   };
   URLParser.prototype.getUrl = function () {
-    var url = '';
+    var url = "";
     url += this._values.Origin;
     // url += this._values.Port ? ':' + this._values.Port : ''
     url += this._values.Path;
-    url += this._values.QueryString ? '?' + this._values.QueryString : '';
+    url += this._values.QueryString ? "?" + this._values.QueryString : "";
     return url;
   };
   URLParser.prototype._parse = function (a) {
     this._initValues();
     var b = this._regex.exec(a);
     if (!b) {
-      throw 'DPURLParser::_parse -> Invalid URL';
+      throw "DPURLParser::_parse -> Invalid URL";
     }
     for (var c in this._fields) {
-      if (typeof b[this._fields[c]] != 'undefined') {
+      if (typeof b[this._fields[c]] != "undefined") {
         this._values[c] = b[this._fields[c]];
       }
     }
-    this._values['Path'] = this._values['Path'] || '/';
-    this._values['Hostname'] = this._values['Host'].replace(/:\d+$/, '');
-    this._values['Origin'] = this._values['Protocol'] + '://' + this._values['Hostname'] + (this._values.Port ? ':' + this._values.Port : '');
+    this._values["Path"] = this._values["Path"] || "/";
+    this._values["Hostname"] = this._values["Host"].replace(/:\d+$/, "");
+    this._values["Origin"] = this._values["Protocol"] + "://" + this._values["Hostname"] + (this._values.Port ? ":" + this._values.Port : "");
   };
   return new URLParser(para);
 };
@@ -566,18 +566,18 @@ export function getOrigin(url) {
   return urlParse(url).getParse().Origin;
 }
 export function getActivePage() {
-  var curPages = typeof getCurrentPages === 'function' ? getCurrentPages() : [];
+  var curPages = typeof getCurrentPages === "function" ? getCurrentPages() : [];
   if (curPages.length) {
     return curPages[curPages.length - 1];
   }
   return {};
 }
 export function findCommaSeparatedValue(rawString, name) {
-  var matches = rawString.match('(?:^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+  var matches = rawString.match("(?:^|;)\\s*" + name + "\\s*=\\s*([^;]+)");
   return matches ? matches[1] : undefined;
 }
 function createCircularReferenceChecker() {
-  if (typeof WeakSet !== 'undefined') {
+  if (typeof WeakSet !== "undefined") {
     var set = new WeakSet();
     return {
       hasAlreadyBeenSeen: function hasAlreadyBeenSeen(value) {
@@ -605,10 +605,10 @@ function createCircularReferenceChecker() {
  */
 export function getType(value) {
   if (value === null) {
-    return 'null';
+    return "null";
   }
   if (Array.isArray(value)) {
-    return 'array';
+    return "array";
   }
   return typeof value;
 }
@@ -618,13 +618,13 @@ export function getType(value) {
  */
 export function mergeInto(destination, source, circularReferenceChecker) {
   // ignore the source if it is undefined
-  if (typeof circularReferenceChecker === 'undefined') {
+  if (typeof circularReferenceChecker === "undefined") {
     circularReferenceChecker = createCircularReferenceChecker();
   }
   if (source === undefined) {
     return destination;
   }
-  if (typeof source !== 'object' || source === null) {
+  if (typeof source !== "object" || source === null) {
     // primitive values - just return source
     return source;
   } else if (source instanceof Date) {
@@ -632,7 +632,7 @@ export function mergeInto(destination, source, circularReferenceChecker) {
   } else if (source instanceof RegExp) {
     var flags = source.flags ||
     // old browsers compatibility
-    [source.global ? 'g' : '', source.ignoreCase ? 'i' : '', source.multiline ? 'm' : '', source.sticky ? 'y' : '', source.unicode ? 'u' : ''].join('');
+    [source.global ? "g" : "", source.ignoreCase ? "i" : "", source.multiline ? "m" : "", source.sticky ? "y" : "", source.unicode ? "u" : ""].join("");
     return new RegExp(source.source, flags);
   }
   if (circularReferenceChecker.hasAlreadyBeenSeen(source)) {
@@ -645,7 +645,7 @@ export function mergeInto(destination, source, circularReferenceChecker) {
     }
     return merged;
   }
-  var merged = getType(destination) === 'object' ? destination : {};
+  var merged = getType(destination) === "object" ? destination : {};
   for (var key in source) {
     if (Object.prototype.hasOwnProperty.call(source, key)) {
       merged[key] = mergeInto(merged[key], source[key], circularReferenceChecker);
@@ -670,10 +670,10 @@ export function defineGlobal(global, name, api) {
   global[name] = api;
 }
 export function getGlobalObject() {
-  if (typeof globalThis === 'object') {
+  if (typeof globalThis === "object") {
     return globalThis;
   }
-  Object.defineProperty(Object.prototype, '_dd_temp_', {
+  Object.defineProperty(Object.prototype, "_dd_temp_", {
     get: function get() {
       return this;
     },
@@ -683,12 +683,12 @@ export function getGlobalObject() {
   var globalObject = _dd_temp_;
   // @ts-ignore
   delete Object.prototype._dd_temp_;
-  if (typeof globalObject !== 'object') {
+  if (typeof globalObject !== "object") {
     // on safari _dd_temp_ is available on window but not globally
     // fallback on other browser globals check
-    if (typeof self === 'object') {
+    if (typeof self === "object") {
       globalObject = self;
-    } else if (typeof window === 'object') {
+    } else if (typeof window === "object") {
       globalObject = window;
     } else {
       globalObject = {};
