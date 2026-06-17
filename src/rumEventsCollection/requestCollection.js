@@ -1,31 +1,14 @@
-import { startXhrProxy } from '../core/xhrProxy';
-import { startDownloadProxy } from '../core/downloadProxy';
-import { LifeCycleEventType } from '../core/lifeCycle';
-import { isObject } from '../helper/utils';
-import { isAllowedRequestUrl } from '../rumEventsCollection/resource/resourceUtils';
-import { startTracer } from '../rumEventsCollection/tracing/tracer';
+import { startXhrProxy } from "../core/xhrProxy";
+import { startDownloadProxy } from "../core/downloadProxy";
+import { LifeCycleEventType } from "../core/lifeCycle";
+import { isObject } from "../helper/utils";
+import { isAllowedRequestUrl } from "../rumEventsCollection/resource/resourceUtils";
+import { startTracer } from "../rumEventsCollection/tracing/tracer";
 var nextRequestIndex = 1;
 export function startRequestCollection(lifeCycle, configuration) {
   var tracer = startTracer(configuration);
   trackXhr(lifeCycle, configuration, tracer);
   trackDownload(lifeCycle, configuration);
-}
-function parseHeader(header) {
-  // 大小写兼容
-  if (!isObject(header)) return header;
-  var res = {};
-  Object.keys(header).forEach(function (key) {
-    res[key.toLowerCase()] = header[key];
-  });
-  return res;
-}
-function getHeaderString(header) {
-  if (!isObject(header)) return header;
-  var headerStr = '';
-  Object.keys(header).forEach(function (key) {
-    headerStr += key + ':' + header[key] + ';';
-  });
-  return headerStr;
 }
 export function trackXhr(lifeCycle, configuration, tracer) {
   var xhrProxy = startXhrProxy();

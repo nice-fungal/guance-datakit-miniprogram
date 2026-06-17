@@ -1,6 +1,6 @@
-import { sdk, getStorageSync, setStorageSync } from '../core/sdk';
-import { UUID } from '../helper/utils';
-import { CLIENT_ID_TOKEN } from '../helper/enums';
+import { sdk, getStorageSync, setStorageSync } from "../core/sdk";
+import { UUID } from "../helper/utils";
+import { CLIENT_ID_TOKEN } from "../helper/enums";
 class BaseInfo {
   constructor() {
     this.getDeviceInfo();
@@ -9,7 +9,7 @@ class BaseInfo {
   getDeviceInfo() {
     try {
       var deviceInfo = {};
-      if (sdk.getDeviceInfo) {
+      if (sdk.getDeviceInfo && !(sdk.getDeviceInfo() instanceof Promise)) {
         deviceInfo = sdk.getDeviceInfo();
       } else {
         var {
@@ -69,15 +69,15 @@ class BaseInfo {
           screenTop
         };
       }
-      var osData = deviceInfo.system.split(' ');
+      var osData = deviceInfo.system && deviceInfo.system.split(" ") || [];
       var osVersion = osData.length > 1 && osData[1];
-      var osVersionMajor = osVersion && osVersion.split('.').length && osVersion.split('.')[0];
+      var osVersionMajor = osVersion && osVersion.split(".").length && osVersion.split(".")[0];
       var osInfo = {
         os: osData.length > 0 && osData[0],
         osVersion,
         osVersionMajor
       };
-      var deviceUUid = '';
+      var deviceUUid = "";
       if (appBaseInfo.host) {
         deviceUUid = appBaseInfo.host.appId;
       }
@@ -117,11 +117,11 @@ class BaseInfo {
   getNetWork() {
     sdk.getNetworkType({
       success: e => {
-        this.deviceInfo.networkType = e.networkType ? e.networkType : 'unknown';
+        this.deviceInfo.networkType = e.networkType ? e.networkType : "unknown";
       }
     });
     sdk.onNetworkStatusChange(e => {
-      this.deviceInfo.networkType = e.networkType ? e.networkType : 'unknown';
+      this.deviceInfo.networkType = e.networkType ? e.networkType : "unknown";
     });
   }
   getLaunchOptions() {

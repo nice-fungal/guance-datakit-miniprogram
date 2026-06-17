@@ -1,6 +1,6 @@
-import { sdk } from './sdk';
-import { now } from '../helper/utils';
-import { RequestType } from '../helper/enums';
+import { sdk } from "./sdk";
+import { now } from "../helper/utils";
+import { RequestType } from "../helper/enums";
 var downloadProxySingleton;
 var beforeSendCallbacks = [];
 var onRequestCompleteCallbacks = [];
@@ -37,11 +37,11 @@ function proxyDownload() {
   var downloadFile = function downloadFile() {
     var _this = this;
     var dataflux_xhr = {
-      method: 'GET',
+      method: "GET",
       startTime: 0,
       url: arguments[0].url,
       type: RequestType.DOWNLOAD,
-      responseType: 'file'
+      responseType: "file"
     };
     dataflux_xhr.startTime = now();
     var originalSuccess = arguments[0].success;
@@ -70,6 +70,7 @@ function proxyDownload() {
         tempFilePath: res.tempFilePath
       });
       dataflux_xhr.header = res.header || {};
+      dataflux_xhr.headers = res.headers || {};
       dataflux_xhr.profile = res.profile;
       dataflux_xhr.status = res.statusCode || res.status || 0;
       onRequestCompleteCallbacks.forEach(function (callback) {
@@ -81,7 +82,7 @@ function proxyDownload() {
     });
     return originalDownloadRequest.apply(this, arguments);
   };
-  if (typeof sdk.downloadFile === 'function') {
+  if (typeof sdk.downloadFile === "function") {
     Object.defineProperties(sdk, {
       // request
       downloadFile: {

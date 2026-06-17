@@ -1,11 +1,12 @@
-import { each, extend, getOrigin, getType, shallowClone } from '../../helper/utils';
-import { TraceType } from '../../helper/enums';
-import { DDtraceTracer } from './ddtraceTracer';
-import { SkyWalkingTracer } from './skywalkingTracer';
-import { JaegerTracer } from './jaegerTracer';
-import { ZipkinSingleTracer } from './zipkinSingleTracer';
-import { ZipkinMultiTracer } from './zipkinMultiTracer';
-import { W3cTraceParentTracer } from './w3cTraceParentTracer';
+import { each, extend, getOrigin, getType, shallowClone } from "../../helper/utils";
+import { TraceType } from "../../helper/enums";
+import { DDtraceTracer } from "./ddtraceTracer";
+import { SkyWalkingTracer } from "./skywalkingTracer";
+import { JaegerTracer } from "./jaegerTracer";
+import { ZipkinSingleTracer } from "./zipkinSingleTracer";
+import { ZipkinMultiTracer } from "./zipkinMultiTracer";
+import { W3cTraceParentTracer } from "./w3cTraceParentTracer";
+import { tracker } from "../../core/sdk";
 export function clearTracingIfCancelled(context) {
   if (context.status === 0) {
     context.traceId = undefined;
@@ -19,12 +20,21 @@ export function startTracer(configuration) {
       return injectHeadersIfTracingAllowed(configuration, context, function (tracingHeaders) {
         context.option = extend({}, context.option);
         var header = {};
-        if (context.option.header) {
-          each(context.option.header, function (value, key) {
-            header[key] = value;
-          });
+        if (tracker === "my") {
+          if (context.option.headers) {
+            each(context.option.headers, function (value, key) {
+              header[key] = value;
+            });
+          }
+          context.option.headers = extend(header, tracingHeaders);
+        } else {
+          if (context.option.header) {
+            each(context.option.header, function (value, key) {
+              header[key] = value;
+            });
+          }
+          context.option.header = extend(header, tracingHeaders);
         }
-        context.option.header = extend(header, tracingHeaders);
       });
     }
   };
@@ -75,9 +85,9 @@ export function injectHeadersIfTracingAllowed(configuration, context, inject) {
   context.spanId = tracer.getSpanId();
   if (configuration.injectTraceHeader) {
     var result = configuration.injectTraceHeader(shallowClone(context));
-    if (getType(result) === 'object') {
+    if (getType(result) === "object") {
       each(result, function (value, key) {
-        if (getType(value) === 'string') {
+        if (getType(value) === "string") {
           headers[key] = value;
         }
       });

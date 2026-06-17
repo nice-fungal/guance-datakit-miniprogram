@@ -1,13 +1,15 @@
-import { sdk } from './sdk';
-import { now } from '../helper/utils';
-import { RequestType } from '../helper/enums';
+import { sdk } from "./sdk";
+import { now } from "../helper/utils";
+import { RequestType } from "../helper/enums";
 var xhrProxySingleton;
 var beforeSendCallbacks = [];
 var onRequestCompleteCallbacks = [];
 var originalXhrRequest;
+var originalXhrHttpRequest;
 export function startXhrProxy() {
   if (!xhrProxySingleton) {
     proxyXhr();
+    proxyHttpXhr();
     xhrProxySingleton = {
       beforeSend: function beforeSend(callback) {
         beforeSendCallbacks.push(callback);
@@ -24,7 +26,7 @@ export function resetXhrProxy() {
     xhrProxySingleton = undefined;
     beforeSendCallbacks.splice(0, beforeSendCallbacks.length);
     onRequestCompleteCallbacks.splice(0, onRequestCompleteCallbacks.length);
-    if (typeof sdk.request === 'function') {
+    if (typeof sdk.request === "function") {
       // 使用 requestProxy 覆盖微信原生 request、uploadFile、downloadFile 接口
       Object.defineProperties(sdk, {
         // request
@@ -32,79 +34,130 @@ export function resetXhrProxy() {
           value: originalXhrRequest
         }
       });
-    } else if (typeof sdk.httpRequest === 'function') {
+    } else if (typeof sdk.httpRequest === "function") {
       // sdk.httpRequest = request
       // 使用 requestProxy 覆盖微信原生 request、uploadFile、downloadFile 接口
       Object.defineProperties(sdk, {
         // request
         httpRequest: {
-          value: originalXhrRequest
+          value: originalXhrHttpRequest
         }
       });
     }
   }
 }
-function proxyXhr() {
-  originalXhrRequest = sdk.request || sdk.httpRequest;
-  var request = function request() {
-    var _this = this;
-    var dataflux_xhr = {
-      method: arguments[0].method || 'GET',
-      startTime: 0,
-      url: arguments[0].url,
-      type: RequestType.XHR,
-      responseType: arguments[0].responseType || 'text',
-      option: arguments[0]
-    };
-    dataflux_xhr.startTime = now();
-    var originalSuccess = arguments[0].success;
-    arguments[0].success = function () {
-      reportXhr(arguments[0]);
-      if (originalSuccess) {
-        originalSuccess.apply(_this, arguments);
-      }
-    };
-    var originalFail = arguments[0].fail;
-    arguments[0].fail = function () {
-      reportXhr(arguments[0]);
-      if (originalFail) {
-        originalFail.apply(_this, arguments);
-      }
-    };
-    var hasBeenReported = false;
-    var reportXhr = function reportXhr(res) {
-      if (hasBeenReported) {
-        return;
-      }
-      hasBeenReported = true;
-      dataflux_xhr.duration = now() - dataflux_xhr.startTime;
-      dataflux_xhr.response = JSON.stringify(res.data);
-      dataflux_xhr.header = res.header || {};
-      dataflux_xhr.profile = res.profile;
-      dataflux_xhr.status = res.statusCode || res.status || 0;
-      onRequestCompleteCallbacks.forEach(function (callback) {
+function proxyHttpXhr() {
+  if (typeof sdk.httpRequest === "function") {
+    originalXhrHttpRequest = sdk.httpRequest;
+    var request = function request() {
+      var _this = this;
+      var dataflux_xhr = {
+        method: arguments[0].method || "GET",
+        startTime: 0,
+        url: arguments[0].url,
+        type: RequestType.XHR,
+        responseType: arguments[0].responseType || "text",
+        option: arguments[0]
+      };
+      dataflux_xhr.startTime = now();
+      var originalSuccess = arguments[0].success;
+      arguments[0].success = function () {
+        reportXhr(arguments[0]);
+        if (originalSuccess) {
+          originalSuccess.apply(_this, arguments);
+        }
+      };
+      var originalFail = arguments[0].fail;
+      arguments[0].fail = function () {
+        reportXhr(arguments[0]);
+        if (originalFail) {
+          originalFail.apply(_this, arguments);
+        }
+      };
+      var hasBeenReported = false;
+      var reportXhr = function reportXhr(res) {
+        if (hasBeenReported) {
+          return;
+        }
+        hasBeenReported = true;
+        dataflux_xhr.duration = now() - dataflux_xhr.startTime;
+        dataflux_xhr.response = JSON.stringify(res.data);
+        dataflux_xhr.header = res.header || {};
+        dataflux_xhr.headers = res.headers || {};
+        dataflux_xhr.profile = res.profile;
+        dataflux_xhr.status = res.statusCode || res.status || 0;
+        onRequestCompleteCallbacks.forEach(function (callback) {
+          callback(dataflux_xhr);
+        });
+      };
+      beforeSendCallbacks.forEach(function (callback) {
         callback(dataflux_xhr);
       });
+      return originalXhrHttpRequest.call(this, dataflux_xhr.option);
     };
-    beforeSendCallbacks.forEach(function (callback) {
-      callback(dataflux_xhr);
-    });
-    return originalXhrRequest.call(this, dataflux_xhr.option);
-  };
-  if (typeof sdk.request === 'function') {
-    // 使用 requestProxy 覆盖微信原生 request、uploadFile、downloadFile 接口
-    Object.defineProperties(sdk, {
-      // request
-      request: {
-        value: request
-      }
-    });
-  } else if (typeof sdk.httpRequest === 'function') {
     // sdk.httpRequest = request
     // 使用 requestProxy 覆盖微信原生 request、uploadFile、downloadFile 接口
     Object.defineProperties(sdk, {
       // request
       httpRequest: {
+        value: request
+      }
+    });
+  }
+}
+function proxyXhr() {
+  if (typeof sdk.request === "function") {
+    // 使用 requestProxy 覆盖微信原生 request、uploadFile、downloadFile 接口
+    originalXhrRequest = sdk.request;
+    var request = function request() {
+      var _this = this;
+      var dataflux_xhr = {
+        method: arguments[0].method || "GET",
+        startTime: 0,
+        url: arguments[0].url,
+        type: RequestType.XHR,
+        responseType: arguments[0].responseType || "text",
+        option: arguments[0]
+      };
+      dataflux_xhr.startTime = now();
+      var originalSuccess = arguments[0].success;
+      arguments[0].success = function () {
+        reportXhr(arguments[0]);
+        if (originalSuccess) {
+          originalSuccess.apply(_this, arguments);
+        }
+      };
+      var originalFail = arguments[0].fail;
+      arguments[0].fail = function () {
+        reportXhr(arguments[0]);
+        if (originalFail) {
+          originalFail.apply(_this, arguments);
+        }
+      };
+      var hasBeenReported = false;
+      var reportXhr = function reportXhr(res) {
+        if (hasBeenReported) {
+          return;
+        }
+        hasBeenReported = true;
+        dataflux_xhr.duration = now() - dataflux_xhr.startTime;
+        dataflux_xhr.response = JSON.stringify(res.data);
+        dataflux_xhr.header = res.header || {};
+        dataflux_xhr.headers = res.headers || {};
+        dataflux_xhr.profile = res.profile;
+        dataflux_xhr.status = res.statusCode || res.status || 0;
+        onRequestCompleteCallbacks.forEach(function (callback) {
+          callback(dataflux_xhr);
+        });
+      };
+      beforeSendCallbacks.forEach(function (callback) {
+        callback(dataflux_xhr);
+      });
+      return originalXhrRequest.call(this, dataflux_xhr.option);
+    };
+    Object.defineProperties(sdk, {
+      // request
+      request: {
         value: request
       }
     });
