@@ -58,7 +58,7 @@ function newView(lifeCycle, route, startTime) {
   var setdataCount = 0;
   var documentVersion = 0;
   var setdataDuration = 0;
-  var loadingDuration = 0;
+  var loadingDuration;
   var loadingTime;
   var showTime;
   var onload2onshowTime;
@@ -95,7 +95,7 @@ function newView(lifeCycle, route, startTime) {
   var stopSetDataTracking = _trackSetDataTime.stop;
   var _trackLoadingTime = trackLoadingTime(lifeCycle, function (duration) {
     if (isNumber(duration)) {
-      loadingDuration = Math.max(duration, loadingDuration);
+      loadingDuration = Math.max(duration, loadingDuration || 0);
       scheduleViewUpdate();
     }
   });
@@ -103,7 +103,7 @@ function newView(lifeCycle, route, startTime) {
   var setLoadEventEnd = function setLoadEventEnd(type) {
     if (type === "onLoad") {
       loadingTime = now();
-      loadingDuration = Math.max(loadingTime - startTime, loadingDuration);
+      loadingDuration = Math.max(loadingTime - startTime, loadingDuration || 0);
     } else if (type === "onShow") {
       showTime = now();
       if (typeof onload2onshowTime === "undefined" && typeof loadingTime !== "undefined") {
