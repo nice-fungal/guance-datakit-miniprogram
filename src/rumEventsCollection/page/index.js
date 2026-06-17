@@ -1,6 +1,6 @@
-import { extend, now, throttle, UUID, isNumber, getActivePage, getMethods } from '../../helper/utils';
-import { trackEventCounts } from '../trackEventCounts';
-import { LifeCycleEventType } from '../../core/lifeCycle';
+import { extend, now, throttle, UUID, isNumber, getActivePage, getMethods } from "../../helper/utils";
+import { trackEventCounts } from "../trackEventCounts";
+import { LifeCycleEventType } from "../../core/lifeCycle";
 // 劫持原小程序App方法
 export var THROTTLE_VIEW_UPDATE_PERIOD = 3000;
 export function rewritePage(configuration, lifeCycle) {
@@ -9,19 +9,19 @@ export function rewritePage(configuration, lifeCycle) {
   var hookPage = function hookPage(pageInstance) {
     var currentView,
       startTime = now();
-    ['onReady', 'onShow', 'onLoad', 'onUnload', 'onHide'].forEach(methodName => {
+    ["onReady", "onShow", "onLoad", "onUnload", "onHide"].forEach(methodName => {
       var userDefinedMethod = pageInstance[methodName];
       pageInstance[methodName] = function () {
-        if (methodName === 'onShow' || methodName === 'onLoad') {
-          if (typeof currentView === 'undefined') {
+        if (methodName === "onShow" || methodName === "onLoad") {
+          if (typeof currentView === "undefined") {
             var activePage = getActivePage();
             currentView = newView(lifeCycle, activePage && activePage.route, startTime);
           }
         }
         currentView && currentView.setLoadEventEnd(methodName);
-        if ((methodName === 'onUnload' || methodName === 'onHide' || methodName === 'onShow') && currentView) {
+        if ((methodName === "onUnload" || methodName === "onHide" || methodName === "onShow") && currentView) {
           currentView.triggerUpdate();
-          if (methodName === 'onUnload' || methodName === 'onHide') {
+          if (methodName === "onUnload" || methodName === "onHide") {
             currentView.end();
             currentView = undefined;
           }
@@ -45,7 +45,7 @@ export function rewritePage(configuration, lifeCycle) {
   };
 }
 function newView(lifeCycle, route, startTime) {
-  if (typeof startTime === 'undefined') {
+  if (typeof startTime === "undefined") {
     startTime = now();
   }
   var id = UUID();
@@ -95,28 +95,29 @@ function newView(lifeCycle, route, startTime) {
   var stopSetDataTracking = _trackSetDataTime.stop;
   var _trackLoadingTime = trackLoadingTime(lifeCycle, function (duration) {
     if (isNumber(duration)) {
-      loadingDuration = duration;
+      loadingDuration = Math.max(duration, loadingDuration);
       scheduleViewUpdate();
     }
   });
   var stopLoadingTimeTracking = _trackLoadingTime.stop;
   var setLoadEventEnd = function setLoadEventEnd(type) {
-    if (type === 'onLoad') {
+    if (type === "onLoad") {
       loadingTime = now();
-    } else if (type === 'onShow') {
+      loadingDuration = Math.max(loadingTime - startTime, loadingDuration);
+    } else if (type === "onShow") {
       showTime = now();
-      if (typeof onload2onshowTime === 'undefined' && typeof loadingTime !== 'undefined') {
+      if (typeof onload2onshowTime === "undefined" && typeof loadingTime !== "undefined") {
         onload2onshowTime = showTime - loadingTime;
       }
-    } else if (type === 'onReady') {
-      if (typeof onshow2onready === 'undefined' && typeof showTime !== 'undefined') {
+    } else if (type === "onReady") {
+      if (typeof onshow2onready === "undefined" && typeof showTime !== "undefined") {
         onshow2onready = now() - showTime;
       }
-      if (typeof fmp === 'undefined') {
+      if (typeof fmp === "undefined") {
         fmp = now() - startTime; // 从开发者角度看，小程序首屏渲染完成的标志是首页 Page.onReady 事件触发。
       }
-    } else if (type === 'onHide' || type === 'onUnload') {
-      if (typeof showTime !== 'undefined') {
+    } else if (type === "onHide" || type === "onUnload") {
+      if (typeof showTime !== "undefined") {
         stayTime = now() - showTime;
       }
       isActive = false;
@@ -164,8 +165,8 @@ function newView(lifeCycle, route, startTime) {
 }
 function trackFptTime(lifeCycle, callback) {
   var subscribe = lifeCycle.subscribe(LifeCycleEventType.PERFORMANCE_ENTRY_COLLECTED, function (entitys) {
-    var firstRenderEntity = entitys.find(entity => entity.entryType === 'render' && entity.name === 'firstRender');
-    if (typeof firstRenderEntity !== 'undefined') {
+    var firstRenderEntity = entitys.find(entity => entity.entryType === "render" && entity.name === "firstRender");
+    if (typeof firstRenderEntity !== "undefined") {
       callback(firstRenderEntity.duration);
     }
   });
@@ -175,8 +176,8 @@ function trackFptTime(lifeCycle, callback) {
 }
 function trackLoadingTime(lifeCycle, callback) {
   var subscribe = lifeCycle.subscribe(LifeCycleEventType.PERFORMANCE_ENTRY_COLLECTED, function (entitys) {
-    var navigationEnity = entitys.find(entity => entity.entryType === 'navigation');
-    if (typeof navigationEnity !== 'undefined') {
+    var navigationEnity = entitys.find(entity => entity.entryType === "navigation");
+    if (typeof navigationEnity !== "undefined") {
       callback(navigationEnity.duration);
     }
   });

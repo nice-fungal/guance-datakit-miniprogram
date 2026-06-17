@@ -1,6 +1,6 @@
 {
     "name": "@cloudcare/rum-miniapp",
-    "version": "2.2.10",
+    "version": "2.2.11",
     "main": "cjs/index.js",
     "module": "esm/index.js",
     "miniprogram": "cjs",
